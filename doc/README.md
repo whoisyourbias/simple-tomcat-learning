@@ -8,6 +8,7 @@
 - [전체 7단계 로드맵](plans/2026-11-05-tomcat-learning-roadmap.md)
 
 - [0단계 환경 구성·실행 기록](00-overview/03-step-00-setup.md)
+- [1단계 소켓 서버·실행 기록](01-socket/01-endpoint.md)
 
 ## 단계별 구현 계획
 

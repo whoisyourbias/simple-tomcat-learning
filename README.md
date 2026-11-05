@@ -2,7 +2,7 @@
 
 작은 서버를 개선하며 **Tomcat 내부 구성요소가 어떤 문제를 해결하는지** 배우는 프로젝트다. TCP 연결에서 출발해 Coyote·Catalina를 구현하고, 사용자 DispatcherServlet을 실행하는 내장 컨테이너까지 완주한다.
 
-**0단계 빌드 환경 구성을 완료했다. JDK 21·Maven Wrapper·JUnit 환경 테스트와 JAR 생성을 검증했으며, 1~7단계 서버 구현은 예정이다.** 기준 소스는 Apache Tomcat 10.1.34로 고정한다.
+**0단계 빌드 환경과 1단계 순차 소켓 서버를 구현했다. 전체 테스트 12개·JAR 생성·두 HTTP 요청·종료 후 포트 반환을 검증했으며, 2~7단계는 예정이다.** 기준 소스는 Apache Tomcat 10.1.34로 고정한다.
 
 ## 처음 공부한다면
 
@@ -10,7 +10,7 @@
 2. [전체 구조](doc/00-overview/02-architecture.md)와 [인터랙티브 구조도](doc/00-overview/tomcat-architecture.html)에서 네트워크·Coyote·Catalina의 책임을 읽는다. 구조도는 저장소를 내려받은 뒤 해당 HTML을 브라우저로 열어 요청·응답 애니메이션과 용어 설명을 확인한다. GitHub 파일 화면에서는 소스가 표시된다.
 3. [전체 로드맵](doc/plans/2026-11-05-tomcat-learning-roadmap.md)으로 7단계의 문제·완료 조건을 확인한다.
 4. [학습·검증·커밋 규칙](doc/reference/03-learning-workflow.md)에 따라 준비 단계의 JDK 21·Maven Wrapper·JUnit 환경을 구성한다.
-5. [1단계 계획](doc/plans/2026-11-05-step-01-socket.md)의 실험부터 시작한다. 이전 코드의 최소 수정으로 문제를 해결한 뒤 책임 분리의 이유를 기록한다.
+5. [1단계 학습·실행 기록](doc/01-socket/01-endpoint.md)의 연결·종료 실험부터 시작한다. 다음 구현은 [2단계 계획](doc/plans/2026-11-05-step-02-coyote.md)의 HTTP 책임 분리다.
 6. 테스트·HTTP 실험 후 실제 Tomcat 메서드와 호출 순서·상태 변화·오류 처리·자원 소유권을 대조한다.
 
 ## 고정된 학습 단계
@@ -42,11 +42,19 @@ macOS·Linux
 sh ./mvnw -B clean verify
 ```
 
-현재 산출물은 target/simple-tomcat-0.0.1-SNAPSHOT.jar이며 애플리케이션 코드 없는 일반 JAR이다. 서버 실행·HTTP 실험은 1단계부터, 실행 가능한 서버 JAR은 7단계에서 제공한다.
+현재 산출물은 target/simple-tomcat-0.0.1-SNAPSHOT.jar이며 Endpoint 클래스를 포함한 일반 JAR이다. Main-Class를 지정한 `java -jar` 실행은 7단계에서 제공한다.
+
+```powershell
+& "$env:JAVA_HOME\bin\java.exe" -cp target/classes simpletomcat.util.net.Endpoint 18081
+# 별도 터미널에서 두 번 호출한다. 서버 종료는 Ctrl+C.
+& "$env:SystemRoot\System32\curl.exe" --max-time 3 -i http://127.0.0.1:18081/hello
+```
+
+포트 0으로 실행하면 임의 포트를 출력한다. 서버는 헤더 끝만 읽어 고정 200 응답을 보내는 중간 모델이며 HTTP 문법 검사와 동시 요청 처리는 아직 없다. 자세한 제약·JAR classpath 실행은 [1단계 기록](doc/01-socket/01-endpoint.md)을 참고한다.
 
 ## 완료 태그로 공부하기
 
-생성된 준비 태그는 learn/step-00이다. learn/step-01~07은 해당 단계 완료 후 생성할 예정이다. 아래 1단계 이후 예제는 해당 태그 생성 후 사용한다.
+완료 태그는 learn/step-00과 learn/step-01이다. learn/step-02~07은 해당 단계 완료 후 생성할 예정이다. 아래 단계 간 diff 예제는 2단계 태그 생성 후 사용한다.
 
 ```sh
 git clone https://github.com/whoisyourbias/simple-tomcat-learning.git
