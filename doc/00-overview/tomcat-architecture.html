@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tomcat · HTTP 요청의 여정</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101721;color:#e6edf7;font-family:system-ui,'Malgun Gothic',sans-serif;line-height:1.65}main{max-width:1180px;margin:auto;padding:44px 24px}h1{font-size:36px;margin:8px 0}h2{font-size:23px;margin:0 0 18px}p{color:#b8c7d9}small{color:#b8c7d9}.eyebrow{color:#66d9c5;letter-spacing:2px;font-size:12px}.intro{max-width:850px}section{margin-top:38px}.frame{border:1px solid #4a657d;border-radius:14px;padding:20px;background:#152231}.frame .frame{background:#192b3c}.label{font-weight:700;margin-bottom:14px}.meta{font-size:13px;color:#aabed1;font-weight:400}.service{display:grid;grid-template-columns:240px 1fr;gap:26px}.connector{border:1px solid #60c9ec;border-radius:10px;padding:18px;background:#163445;align-self:start}.engine{border:1px solid #5f829c;border-radius:10px;padding:18px}.host{border-left:3px solid #789cb7;padding:12px 0 0 18px}.context{border:1px dashed #8299ad;padding:16px;border-radius:8px;margin-top:12px}.spring{background:#233b32;border:1px solid #68c695;border-radius:8px;padding:16px}.bridge{text-align:center;color:#80d5ec;font-size:13px;margin:12px 0}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.node{padding:10px 14px;background:#203347;border-radius:6px}.arrow{color:#76d8c4;font-weight:bold}.legend{display:flex;gap:24px;flex-wrap:wrap;font-size:13px;margin:15px 0;color:#b8c7d9}button{font:inherit;background:#253e53;color:#e6edf7;border:1px solid #56768f;border-radius:6px;padding:8px 16px;cursor:pointer}button:focus-visible{outline:3px solid #8fe7d5}button:hover{background:#34536d}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}.step{padding:16px;background:#192838;border:1px solid #344b61;border-radius:9px;position:relative}.step.active{border:2px solid #6ce0c8;background:#234139;padding:15px}.step b{display:block}.step small{display:block;margin-top:7px}.num{color:#71dbc5;font-size:12px}.detail{min-height:120px;margin-top:15px;border-left:3px solid #71dbc5;padding:12px 20px;background:#162a32}.detail strong{font-size:19px}.detail p{margin:8px 0}.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}.note{background:#192838;padding:22px;border-radius:10px}code{color:#98e5d4}pre{white-space:pre-wrap;color:#a9dcef;background:#101b29;padding:18px;border-radius:8px}a{color:#93d7f3}footer{margin-top:36px;font-size:13px;color:#a9bed1}@media(max-width:760px){.service,.two{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}h1{font-size:28px}.frame{padding:12px}}
+.flow-scroll{overflow-x:auto;margin:20px 0}.flow-map{display:block;width:100%;min-width:1040px;height:auto}.flow-map text{fill:#e6edf7;font-size:14px}.flow-map .flow-box{fill:#192b3c;stroke:#52718a;stroke-width:1.5}.flow-map .flow-box.lit{fill:#245548;stroke:#8cf5d8;stroke-width:3}.flow-map .wire{fill:none;stroke:#59758c;stroke-width:2}.flow-map .return-wire{stroke:#d9ac6d;stroke-dasharray:6 5}.flow-map .boundary{fill:#162432;stroke:#49677e;stroke-dasharray:6 5}.flow-map .caption{font-size:12px;fill:#b8c7d9}#packet{fill:#75efcd;stroke:#101721;stroke-width:3}button:disabled{opacity:.45;cursor:default}select{font:inherit;background:#253e53;color:#e6edf7;padding:8px;border:1px solid #56768f;border-radius:6px}
+.playback{position:sticky;top:0;z-index:5;padding:12px 0;background:#101721}.playback #play{background:#84efce;color:#10251e;font-weight:750;border:2px solid #84efce} .flow-map [data-term]{text-decoration:underline dotted #82a4b7;cursor:help}.flow-map [data-term]:hover,.flow-map [data-term]:focus{fill:#9df5d8}#term-tip{position:fixed;z-index:20;width:max-content;max-width:min(310px,calc(100vw - 16px));padding:12px 15px;border:1px solid #75ceb8;border-radius:10px;background:#0c2029;color:#e6edf7;box-shadow:0 5px 20px #0006;pointer-events:none;font-size:14px}#term-tip strong{display:block;color:#9df5d8}
+/* Review additions: explicitly distinguish lookup, selection, and invocation. */
+.mapper-section{scroll-margin-top:90px}
+.mapper-intro{max-width:970px;margin:0 0 20px}
+.mapper-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.mapper-card{border:1px solid #426078;background:#192b3b;border-radius:10px;padding:18px;min-width:0}
+.mapper-card h3{font-size:17px;margin:5px 0 12px;color:#edf9f7}
+.mapper-card p{margin:8px 0 0}
+.mapper-card ul{margin:10px 0 0;padding-left:20px;color:#b8c7d9}
+.mapper-tag{font-size:12px;letter-spacing:.4px;color:#78e5c9;font-weight:700}
+.mapper-code{border:1px solid #466a76;background:#122535;padding:17px 19px;margin:17px 0;border-radius:10px;overflow:auto;font-size:14px}
+.mapper-code code{white-space:pre-wrap;overflow-wrap:anywhere}
+.mapper-demo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:16px}
+.mapper-demo>div{background:#192838;border:1px solid #3b5872;border-radius:9px;padding:16px;min-width:0}
+.mapper-demo h3{margin:0 0 12px;font-size:16px}
+.mapper-demo pre{margin:0;overflow:auto;min-height:180px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.65}
+.mapper-warn{border-left:3px solid #83dbc7;background:#162a32;padding:14px 17px;margin:17px 0;color:#d0e5e6}
+.mapper-table{width:100%;border-collapse:collapse;font-size:14px;margin:14px 0;color:#d3e4f1}
+.mapper-table th,.mapper-table td{border-bottom:1px solid #36516a;text-align:left;padding:10px 12px;vertical-align:top}
+.mapper-table th{color:#a1dfd2;background:#203447}
+.review-notes{margin:14px 0 0;padding-left:22px;color:#c4d3e0}
+.review-notes li{margin:8px 0}
+@media(max-width:760px){.mapper-steps,.mapper-demo{grid-template-columns:1fr}.mapper-table{font-size:12px}.mapper-table th,.mapper-table td{padding:8px 6px}}
+</style>
+</head>
+<body><main>
+<div class="eyebrow">SIMPLE-TOMCAT / LEARNING MAP</div>
+<h1>HTTP 요청이 Java 메서드에 도착하기까지</h1>
+<div class="row playback"><label>요청 종류 <select id="request-mode"><option value="mvc">일반 · /orders/count</option><option value="jsp">JSP · /hello.jsp</option></select></label><button id="play" type="button">▶ 요청 보내기</button><label>재생 속도 <select id="speed"><option value="0.5">0.5배</option><option value="1" selected>1배</option><option value="2">2배</option></select></label><span id="motion-status" role="status">재생하면 요청과 응답이 경로를 따라 이동합니다.</span></div>
+<p class="intro">Tomcat은 클라이언트 연결을 받아 HTTP를 해석하고, 웹 애플리케이션의 서블릿을 실행한 뒤 응답을 전송합니다. 아래에서는 <code>GET /orders/count</code> 요청이 Spring MVC를 사용하는 애플리케이션에 도착하는 과정을 살펴봅니다.</p>
+<section aria-labelledby="flow"><h2 id="flow">01 · 요청 한 건으로 읽는 Tomcat 구조</h2><p>점선 밑줄이 있는 용어에 마우스를 올리거나 터치하면 설명이 열립니다. 테두리 안쪽이 해당 컴포넌트의 소속입니다. 왼쪽 실선을 따라 내려가면 요청 호출, 오른쪽 점선을 따라 올라가면 응답 복귀입니다. Mapper에서 Wrapper로 이어지는 보조선은 <strong>선택 결과를 나타내며 직접 호출을 뜻하지 않습니다.</strong></p>
+
+<div class="flow-scroll"><svg class="flow-map" viewBox="0 0 1190 815" role="group" aria-labelledby="flow-title flow-desc">
+<title id="flow-title">Tomcat 구성과 주문 조회의 요청·응답 경로</title>
+<desc id="flow-desc">Catalina Service가 Connector와 Engine을 묶습니다. Connector는 Coyote ProtocolHandler를 사용합니다. Mapper 조회로 Host·Context·Wrapper가 MappingData에 기록되고, 실제 실행은 Engine → Host → Context → Wrapper Pipeline을 통해 이뤄집니다. JSP와 주문 조회는 서로 다른 Wrapper를 사용합니다.</desc><rect x="8" y="85" width="850" height="705" rx="8" fill="#172638" stroke="#638193" class=""/><text x="20" y="108">Tomcat Server · Catalina</text><rect x="24" y="118" width="817" height="650" rx="8" fill="#1a2d40" stroke="#638193" class=""/><text x="40" y="143">Service · Catalina</text><text x="392" y="143" class="caption">1개 이상의 Connector와 1개의 Engine을 연결</text><rect x="45" y="155" width="520" height="129" rx="8" fill="#193444" stroke="#638193" class=""/><text x="60" y="180">Connector · Catalina</text><text x="60" y="200" class="caption">프로토콜 처리에 Coyote 사용 →</text><rect x="45" y="291" width="770" height="457" rx="8" fill="#223446" stroke="#638193" class=""/><text x="60" y="321">Engine · 최상위 컨테이너</text><text x="60" y="349" class="caption">컨테이너는 하위 요소를 관리합니다.</text><rect x="64" y="378" width="735" height="358" rx="8" fill="#23394a" stroke="#638193" class=""/><text x="78" y="406">Host · localhost</text><rect x="82" y="451" width="700" height="278" rx="8" fill="#273e4c" stroke="#638193" class=""/><text x="96" y="483">Context · ROOT 웹 앱</text><text x="40" y="59">클라이언트</text><text x="390" y="93" class="caption">↓ 요청 호출　 ↑ 응답 복귀</text><text x="385" y="373" class="caption">Pipeline = 컨테이너의 처리 순서　·　Valve = 개별 처리 단계</text><path id="jsp-request-wire" d="M320 492 V530 H600 V717" fill="none" stroke="#72dabe" stroke-width="3" opacity=".18"/><path id="jsp-response-wire" d="M600 717 L615 735 L630 717 V540 H350 V492" fill="none" stroke="#ffc582" stroke-width="3" stroke-dasharray="5 5" opacity=".18"/><path d="M320 55 V492" stroke="#72dabe" stroke-width="3"/><path d="M350 492 V55" stroke="#ffc582" stroke-width="3" stroke-dasharray="5 5"/><path id="mvc-request-wire" d="M320 492 V717" stroke="#72dabe" stroke-width="3"/><path id="mvc-response-wire" d="M350 717 V492" stroke="#ffc582" stroke-width="3" stroke-dasharray="5 5"/><path d="M320 717 L335 735 L350 717" fill="none" stroke="#ffc582"/><rect x="290" y="39" width="450" height="32" rx="8" fill="#192b3c" stroke="#52718a" class="flow-box"/><text x="312" y="60">↓</text><text x="342" y="60">↑</text><text x="382" y="60">브라우저</text><rect x="290" y="173" width="258" height="32" rx="8" fill="#192b3c" stroke="#52718a" class="flow-box"/><text x="312" y="194">↓</text><text x="342" y="194">↑</text><text x="382" y="194">Coyote · ProtocolHandler</text><rect x="290" y="236" width="258" height="32" rx="8" fill="#192b3c" stroke="#52718a" class="flow-box"/><text x="312" y="257">↓</text><text x="342" y="257">↑</text><text x="382" y="257">CoyoteAdapter</text><rect x="290" y="316" width="450" height="32" rx="8" fill="#192b3c" stroke="#52718a" class="flow-box"/><text x="312" y="337">↓</text><text x="342" y="337">↑</text><text x="382" y="337">Engine Pipeline</text><rect x="290" y="396" width="450" height="32" rx="8" fill="#192b3c" stroke="#52718a" class="flow-box"/><text x="312" y="417">↓</text><text x="342" y="417">↑</text><text x="382" y="417">Host Pipeline</text><rect x="290" y="476" width="450" height="32" rx="8" fill="#192b3c" stroke="#52718a" class="flow-box"/><text x="312" y="497">↓</text><text x="342" y="497">↑</text><text x="382" y="497">Context Pipeline</text><rect x="290" y="556" width="258" height="32" rx="8" fill="#192b3c" stroke="#52718a" class="flow-box"/><text x="312" y="577">↓</text><text x="342" y="577">↑</text><text x="382" y="577">Wrapper · 주문 디스패처용</text><rect x="290" y="636" width="258" height="32" rx="8" fill="#192b3c" stroke="#52718a" class="flow-box"/><text x="312" y="657">↓</text><text x="342" y="657">↑</text><text x="382" y="657">DispatcherServlet</text><rect x="290" y="701" width="258" height="32" rx="8" fill="#192b3c" stroke="#52718a" class="flow-box"/><text x="312" y="722">↓</text><text x="342" y="722">↑</text><text x="382" y="722">Controller → Service</text><text x="290" y="221" class="caption">Endpoint → HTTP Processor → Adapter</text><text x="60" y="252" class="caption">Adapter가 조회 후 Engine 호출</text><text x="78" y="432" class="caption">기본 Valve가 선택된 Context를 호출</text><text x="99" y="522" class="caption">Mapper의 선택 결과 · 직접 호출 X</text><text x="370" y="542" class="caption">/ 매핑 → 주문 Wrapper</text><text x="560" y="542" class="caption">*.jsp 매핑 → JSP Wrapper</text><defs><marker id="map-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#72dabe"/></marker><marker id="alt-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#d6addb"/></marker></defs>
+<rect x="600" y="165" width="195" height="35" rx="8" fill="#2c3c49" stroke="#a0b2c9"/><text x="611" y="187">MapperListener · 등록 동기화</text><path d="M790 202 V234" fill="none" stroke="#c8aedf" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#alt-arrow)"/><rect id="mapper-box" x="600" y="236" width="195" height="32" rx="8" fill="#2d3348" stroke="#a0b2c9"/>
+<text x="615" y="257">Mapper · Service 소유</text>
+<path d="M548 245 H600 M600 262 H548" fill="none" stroke="#72dabe" marker-end="url(#map-arrow)"/>
+<text x="595" y="225" class="caption">Adapter가 조회, Mapper가 데이터 기록</text>
+<path d="M795 252 H806 V530" fill="none" stroke="#72dabe" stroke-width="2" marker-end="url(#map-arrow)"/>
+<path id="mvc-choice" d="M806 530 H420 V556" fill="none" stroke="#72dabe" stroke-width="2" marker-end="url(#map-arrow)"/><path id="jsp-choice" d="M806 530 H670 V556" fill="none" stroke="#d6addb" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#alt-arrow)"/>
+<text x="600" y="283" class="caption">MappingData의 참조값 (실행 경로 아님)</text><rect data-jsp-node="wrapper" class="flow-box" x="558" y="556" width="206" height="32" rx="8" fill="#372e43" stroke="#638193"/><text x="571" y="577">Wrapper · JSP용</text><text x="370" y="614" class="caption">↓ FilterChain → service()</text><text x="572" y="614" class="caption">↓ FilterChain → service()</text><rect data-jsp-node="servlet" class="flow-box" x="558" y="636" width="206" height="32" rx="8" fill="#372e43" stroke="#638193"/><text x="572" y="657">Jasper · JspServlet</text><rect data-jsp-node="generated" class="flow-box" x="558" y="701" width="206" height="32" rx="8"/><text x="571" y="722">생성된 JSP 서블릿</text><text x="570" y="692" class="caption">JSP에 EL이 있다면 → Jasper EL 평가</text><text x="97" y="652" class="caption">애플리케이션 코드 →</text><text x="97" y="717" class="caption">주문 수 조회 →</text><rect x="875" y="117" width="309" height="600" rx="8" fill="#1e2c38" stroke="#638193" class=""/><text x="892" y="147">기능별 연관 모듈</text><text x="892" y="171" class="caption">주문 조회 경로와 별도로 사용</text><text x="892" y="223">Jasper / Jasper EL</text><text x="892" y="248" class="caption">JSP를 서블릿으로 변환·실행</text><text x="892" y="270" class="caption">EL은 JSP 등의 표현식을 평가</text><text x="892" y="346">Tomcat WebSocket</text><text x="892" y="371" class="caption">업그레이드 요청이 성공한 뒤</text><text x="892" y="393" class="caption">WebSocket 메시지 처리</text><text x="892" y="469">JULI</text><text x="892" y="494" class="caption">Tomcat 여러 구성 요소에서</text><text x="892" y="516" class="caption">진단 로그 기록</text><text x="892" y="592">Catalina HA → Tribes</text><text x="892" y="617" class="caption">HA가 세션 복제 등을 담당하고</text><text x="892" y="639" class="caption">Tribes가 노드 간 메시지를 전송</text><circle id="packet" r="8"/><text id="packet-label" visibility="hidden"></text></svg></div>
+<pre id="request-example">GET /orders/count HTTP/1.1\r\n
+Host: localhost:8080\r\n
+\r\n</pre>
+<div class="row"><button id="prev" type="button">← 이전</button><button id="next" type="button">다음 단계 →</button><button id="reset" type="button">처음으로</button><span id="position"></span></div>
+<div class="steps" id="steps"></div><div class="detail" id="detail" aria-live="polite"></div>
+</section>
+
+<section id="mapper-deep" class="mapper-section" aria-labelledby="mapper-title">
+<h2 id="mapper-title">02 · Service 소유 Mapper가 실제로 하는 일</h2>
+<p class="mapper-intro">Mapper는 HTTP를 파싱하거나 서블릿을 실행하는 객체가 아닙니다. <strong>배포·설정 시 매핑 테이블을 유지</strong>하고 <strong>요청마다 어느 Host / Context / Wrapper를 사용할지 조회</strong>합니다. Tomcat 10.1.34의 <code>StandardService</code>가 <code>Mapper</code>와 <code>MapperListener</code> 인스턴스를 보유합니다. 따라서 여러 Connector가 같은 Service에 연결되어 있다면 같은 매핑 정보를 참조할 수 있습니다.</p>
+<div class="mapper-steps">
+  <article class="mapper-card"><div class="mapper-tag">① 시작·배포·변경 시</div><h3>MapperListener가 등록 정보 동기화</h3><p>Engine 아래의 Host, Context, Wrapper에 대한 시작·중지 및 구성 변경 이벤트를 관찰하고, 사용 가능한 매핑 정보를 Mapper에 등록하거나 제거합니다.</p><ul><li>Host 이름·별칭·기본 Host</li><li>Context 경로·웹 앱 버전·welcome file</li><li>Wrapper의 서블릿 URL 패턴 (<code>/</code>, <code>*.jsp</code> 등)</li></ul></article>
+  <article class="mapper-card"><div class="mapper-tag">② HTTP 요청 도착 시</div><h3>CoyoteAdapter가 Mapper 조회</h3><p>HTTP Processor가 요청을 해석한 뒤, Adapter가 필요한 URI 처리와 Catalina 요청·응답 객체 연결을 수행하고 Service의 Mapper에 조회를 요청합니다.</p><ul><li>Host 이름으로 가상 Host 선택</li><li>요청 URI에서 웹 앱 Context 선택</li><li>서블릿 매핑 규칙으로 Wrapper 선택</li></ul></article>
+  <article class="mapper-card"><div class="mapper-tag">③ 조회가 끝난 후</div><h3>MappingData를 사용해 Pipeline 실행</h3><p>Mapper는 대상 객체를 직접 호출하지 않고 요청의 <code>MappingData</code>에 선택 정보를 채웁니다. Adapter는 Engine Pipeline을 호출합니다. Engine·Host·Context의 기본 Valve는 선택된 다음 컨테이너로 전달하고, Wrapper의 기본 Valve는 FilterChain을 실행합니다.</p><ul><li><code>Engine → Host → Context → Wrapper</code></li><li>Wrapper Valve → FilterChain → Servlet</li><li>그 다음에야 Spring MVC가 Controller를 선택</li></ul></article>
+</div>
+<div class="mapper-code"><code>// CoyoteAdapter의 핵심 순서를 요약한 코드 (Tomcat 10.1.34)
+connector.getService().getMapper()
+    .map(serverName, decodedURI, version, request.getMappingData());
+
+// 성공적으로 후처리되면 Adapter가 Engine의 Pipeline을 호출
+connector.getService().getContainer()
+    .getPipeline().getFirst().invoke(request, response);</code></div>
+<div class="mapper-demo">
+  <div><h3>현재 요청의 매핑 결과</h3><pre id="mapper-example" aria-live="polite"></pre><p><small>상단의 요청 종류를 바꾸면 이 예시도 함께 갱신됩니다. <code>MappingData</code>는 반환 객체를 새로 만드는 방식이 아니라, 전달받은 객체에 결과를 채우는 방식입니다.</small></p></div>
+  <div><h3>서블릿 URL 패턴의 우선순위</h3><table class="mapper-table"><thead><tr><th>우선</th><th>매핑 종류</th><th>예시</th></tr></thead><tbody>
+  <tr><td>1</td><td>정확한 경로</td><td><code>/orders/count</code></td></tr>
+  <tr><td>2</td><td>가장 긴 경로 접두사</td><td><code>/orders/*</code></td></tr>
+  <tr><td>3</td><td>확장자</td><td><code>*.jsp</code></td></tr>
+  <tr><td>4</td><td>기본 서블릿 매핑</td><td><code>/</code></td></tr>
+  </tbody></table><p><small>먼저 Host를 결정하고, 요청 URI에 맞는 Context를 선택한 다음 해당 Context 안에서 서블릿 매핑 규칙을 적용합니다. 이 표는 일반적인 서블릿 선택 순서의 요약입니다. Context 선택 규칙은 별도이며, context-root 특수 매핑·welcome file·redirect 등 추가 처리는 생략했습니다.</small></p></div>
+</div>
+<p class="mapper-warn"><strong>반드시 구별:</strong> Mapper가 <code>Wrapper = DispatcherServlet</code>을 선택하는 것과 Spring MVC가 <code>@GetMapping("/orders/count")</code> 메서드를 찾는 것은 서로 다른 두 번의 라우팅입니다. 반대로 <code>/hello.jsp</code>는 <code>*.jsp</code> 확장자 매핑이 <code>/</code> 기본 매핑보다 우선하므로 JspServlet Wrapper를 선택하는 예시입니다.</p>
+<p><small>구현 기준 · Apache Tomcat 10.1.34: <a href="https://github.com/apache/tomcat/blob/10.1.34/java/org/apache/catalina/core/StandardService.java">StandardService</a> · <a href="https://github.com/apache/tomcat/blob/10.1.34/java/org/apache/catalina/mapper/MapperListener.java">MapperListener</a> · <a href="https://github.com/apache/tomcat/blob/10.1.34/java/org/apache/catalina/mapper/Mapper.java">Mapper 소스</a> · <a href="https://github.com/apache/tomcat/blob/10.1.34/java/org/apache/catalina/mapper/MappingData.java">MappingData 소스</a> · <a href="https://github.com/apache/tomcat/blob/10.1.34/java/org/apache/catalina/connector/CoyoteAdapter.java">CoyoteAdapter</a></small></p>
+</section>
+<section id="component-review" aria-labelledby="review-title"><h2 id="review-title">03 · 구성요소 책임 경계 · 빠른 확인</h2>
+<table class="mapper-table"><thead><tr><th>구성요소</th><th>정확한 책임</th><th>혼동하지 말 것</th></tr></thead><tbody>
+<tr><td><code>Server / Service</code></td><td>서버 수명주기 / Connector 여러 개와 Engine 하나 묶기</td><td>애플리케이션의 업무 Service와 별개</td></tr>
+<tr><td><code>Connector / Coyote</code></td><td>통신 진입점 / Endpoint 소켓 I/O, Processor HTTP 처리</td><td>Controller 메서드의 선택은 하지 않음</td></tr>
+<tr><td><code>CoyoteAdapter</code></td><td>Coyote와 Catalina 연결, Request·Response 연계, Mapper 조회와 Engine 호출</td><td>Mapper가 아니라 Adapter가 Pipeline을 호출</td></tr>
+<tr><td><code>Engine / Host / Context</code></td><td>Service의 컨테이너 / 가상 Host / 웹 애플리케이션 경계</td><td>Tomcat Context ≠ Spring ApplicationContext</td></tr>
+<tr><td><code>Pipeline / Valve</code></td><td>컨테이너별 Valve 처리 체인. Engine·Host·Context의 기본 Valve는 다음 계층으로 전달하고 Wrapper의 기본 Valve는 FilterChain 실행</td><td>Servlet FilterChain과 다른 계층</td></tr>
+<tr><td><code>Wrapper / FilterChain</code></td><td>서블릿 등록·생명주기 / 필터를 순서대로 실행하고 마지막에 Servlet 호출</td><td>URL 매핑 정보와 실제 Java 메서드 라우팅은 별개</td></tr>
+<tr><td><code>DispatcherServlet / Jasper</code></td><td>Spring MVC의 Handler 선택 / JSP의 서블릿 변환·컴파일·실행 관리</td><td>JSP 요청이 반드시 DispatcherServlet을 거치는 것은 아님</td></tr>
+</tbody></table>
+</section>
+<section class="two"><div class="note"><h2>04 · Tomcat이 책임지는 것</h2><p>네트워크 연결, HTTP 처리, 웹 애플리케이션·서블릿 선택, 서블릿 생명주기, 필터 호출, 동시 요청 실행과 응답 전송을 담당합니다.</p><p>서블릿은 보통 여러 요청에서 공유됩니다. 요청별 데이터는 지역 변수나 요청 객체에 보관하고, 공유 상태에는 동시성 처리가 필요합니다.</p></div><div class="note"><h2>05 · 두 프로젝트의 연결 지점</h2><p><code>simple-tomcat</code>이 요청·응답 객체와 서블릿 호출 계약을 제공하고, <code>simple-spring</code>이 그 계약에 맞는 디스패처를 등록합니다.</p><p>학습용 첫 버전에서는 Host와 Context를 각각 하나로 고정해 시작할 수 있습니다. 이후 다중 애플리케이션을 구현하면서 계층을 확장합니다.</p><small>Tomcat의 Context는 웹 애플리케이션 단위입니다. Spring의 ApplicationContext는 빈을 관리하는 IoC 컨테이너입니다.</small></div></section>
+<footer>Jasper는 JSP를 서블릿으로 변환·컴파일하는 JSP 엔진입니다. 그림의 *.jsp 분기는 JSP 요청이 매핑되는 경우를 보여 줍니다. MapperListener는 배포·변경 시 매핑 정보를 갱신하며 Mapper는 요청 시 MappingData를 채웁니다. 요청 종류를 선택해 DispatcherServlet 경로와 직접 JSP 경로를 각각 재생할 수 있습니다. <a href="https://tomcat.apache.org/tomcat-10.1-doc/jasper-howto.html">Jasper 공식 문서</a> · <a href="https://tomcat.apache.org/tomcat-10.1-doc/class-loader-howto.html">Tomcat 모듈 목록</a> · <a href="https://tomcat.apache.org/tomcat-10.1-doc/architecture/requestProcess.html">Tomcat 요청 처리 흐름</a><br>Spring MVC 요청과 직접 JSP 요청을 비교하는 동기 처리 개념도입니다. 필터가 응답을 바로 반환하는 경로와 비동기 처리는 생략했습니다. ROOT Context에 디스패처가 <code>/</code>로 매핑된 예시이며, simple-spring의 디스패처 이름과 API는 구현 과정에서 정할 수 있습니다.<br>공식 자료 · <a href="https://tomcat.apache.org/tomcat-10.1-doc/architecture/overview.html">Tomcat 아키텍처</a> · <a href="https://tomcat.apache.org/tomcat-10.1-doc/config/context.html">Context와 매핑</a> · <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-servlet.html">DispatcherServlet</a></footer>
+</main><div id="term-tip" role="tooltip" hidden><strong></strong><span></span></div><script>
+const mvcStages=[
+['Coyote · Connector','연결 수락 · HTTP 파싱','Connector에 연결된 Coyote ProtocolHandler 내부에서 Endpoint가 연결과 소켓 읽기·쓰기 이벤트를 다루고, HTTP Processor가 GET, /orders/count, Host 헤더 등 HTTP 요청 데이터를 파싱합니다.'],
+['CoyoteAdapter / Mapper','Service의 매핑 테이블 조회','MapperListener가 배포 정보로 유지한 Mapper 테이블을 CoyoteAdapter가 조회합니다. serverName=localhost, URI=/orders/count를 기준으로 Host=localhost, Context=ROOT, Wrapper=DispatcherServlet(/ 기본 매핑)을 MappingData에 기록합니다. Mapper는 Wrapper를 호출하지 않습니다. Adapter가 Engine Pipeline을 시작하며, Mapper에서 Wrapper로 향하는 보조선은 참조 결과입니다.'],
+['Engine → Host → Context','컨테이너 Pipeline 실행','Engine은 Service의 최상위 컨테이너이고 Host들을 관리합니다. Engine, Host, Context, Wrapper 각각에 Pipeline이 있으며 여러 Valve 이후 기본 Valve가 실행됩니다. Engine·Host·Context의 기본 Valve는 Mapper가 기록한 Host·Context·Wrapper를 참조해 다음 컨테이너의 Pipeline을 호출합니다. Wrapper의 기본 Valve는 서블릿을 준비하고 FilterChain을 실행합니다. Context는 웹 애플리케이션 하나의 경계입니다.'],
+['Wrapper / FilterChain','서블릿 준비 · 필터 · service()','Wrapper는 서블릿의 등록·초기화·생명주기를 관리합니다. Wrapper Pipeline의 기본 Valve(StandardWrapperValve)는 대상 서블릿을 준비하고 현재 요청에 적용되는 FilterChain을 구성·호출합니다. 각 필터가 chain.doFilter(...)를 호출하면 다음 필터로 진행하고 끝에서 Servlet.service(...)가 호출됩니다. 필터가 진행을 중단해 직접 응답할 수도 있습니다.'],
+['DispatcherServlet','컨트롤러 선택','simple-spring이 GET /orders/count에 대응하는 컨트롤러 메서드를 선택합니다. Tomcat에서 서블릿을 고르는 매핑과 Spring에서 컨트롤러를 고르는 매핑이 각각 존재합니다.'],
+['Controller → Service','애플리케이션 로직 실행','주문 컨트롤러가 서비스를 통해 주문 수 1을 얻습니다. 디스패처의 반환값 처리 과정에서 상태 200과 응답 본문을 설정합니다.'],
+['FilterChain → Container','호출 복귀 · 응답 마무리','서블릿 호출이 반환되고 필터의 후처리와 컨테이너 호출 복귀가 이루어집니다. 이 예시는 작은 본문을 처리 종료 시 전송하는 흐름입니다. 실제 응답은 flush 또는 버퍼 조건에 따라 더 일찍 커밋될 수 있습니다.'],
+['Connector → 클라이언트','HTTP 응답 전송','Connector에 연결된 Coyote의 HTTP Processor·출력 버퍼가 상태·헤더·본문을 HTTP 형식으로 기록하고, Endpoint의 네트워크 I/O를 통해 클라이언트로 전송합니다. 클라이언트는 상태 200과 본문 1을 받습니다. 연결 유지 여부는 HTTP 버전·헤더·서버 설정에 따라 결정됩니다.']];
+
+const jspStages=mvcStages.map(stage=>[...stage]);
+jspStages[0]=['Coyote · Connector','JSP 요청 해석','Endpoint와 HTTP Processor가 GET /hello.jsp 요청을 처리합니다.'];
+jspStages[1]=['CoyoteAdapter / Mapper','JSP용 Wrapper 선택','Service의 Mapper가 localhost + /hello.jsp를 조회해 ROOT Context와 *.jsp 확장자 매핑의 JspServlet Wrapper를 MappingData에 기록합니다. *.jsp는 / 기본 매핑보다 우선합니다. Adapter가 이후 Engine Pipeline을 호출하며 Mapper가 JSP를 실행하는 것은 아닙니다.'];
+jspStages[4]=['Jasper · JspServlet','JSP 준비','최초 실행에 필요한 컴파일 결과가 없거나 재컴파일이 필요한 경우 JSP를 서블릿 Java 소스로 변환·컴파일합니다. 유효한 결과는 재사용합니다. 변경 검사와 반영 시점은 development·검사 주기·백그라운드 검사 설정에 따르며 파일 변경이 항상 다음 요청에 즉시 반영되지는 않습니다.'];
+jspStages[5]=['생성된 JSP 서블릿','HTML 렌더링','생성된 JSP 서블릿의 _jspService(...)가 HTML을 씁니다. EL 구문이 있으면 Jasper EL이 평가합니다. 이 예시는 Hello JSP를 본문으로 보냅니다.'];
+jspStages[7]=['Connector → 클라이언트','HTML 응답 전송','상태 200과 HTML 본문 Hello JSP를 클라이언트로 전송합니다.'];
+let stages=mvcStages;
+let current=0;const steps=document.getElementById('steps');stages.forEach((stage,index)=>{const button=document.createElement('button');button.className='step';button.innerHTML='<span class="num">'+String(index+1).padStart(2,'0')+'</span><b>'+stage[0]+'</b><small>'+stage[1]+'</small>';button.addEventListener('click',()=>{pause();current=index;render();placeAtStage()});steps.appendChild(button)});
+function render(){Array.from(steps.children).forEach((el,index)=>{el.querySelector('b').textContent=stages[index][0];el.querySelector('small').textContent=stages[index][1];el.classList.toggle('active',index===current);el.setAttribute('aria-pressed',String(index===current))});document.getElementById('detail').innerHTML='<strong>'+stages[current][1]+'</strong><p>'+stages[current][2]+'</p>';document.getElementById('position').textContent=(current+1)+' / '+stages.length;document.getElementById('prev').disabled=current===0;document.getElementById('next').disabled=current===stages.length-1}
+const mvcCoordinates=[[320,55,"브라우저"],[320,189,"Coyote · ProtocolHandler"],[320,252,"CoyoteAdapter"],[320,332,"Engine"],[320,412,"Host"],[320,492,"Context"],[320,572,"Wrapper / FilterChain"],[320,652,"DispatcherServlet"],[320,717,"Controller → Service"]];
+
+const mvcBoxes=[...document.querySelectorAll('.flow-box:not([data-jsp-node])')];
+const jspBoxes=[...document.querySelectorAll('[data-jsp-node]')];
+const jspCoordinates=[...mvcCoordinates.slice(0,6),[600,572,'Wrapper / FilterChain · JSP'],[600,652,'Jasper · JspServlet'],[600,717,'생성된 JSP 서블릿']];
+let coordinates=mvcCoordinates;
+let boxes=mvcBoxes;
+
+let journey=[];
+function buildJourney(){
+ journey=[];
+ const inboundStages=[0,1,2,2,2,3,4,5];
+ for(let node=1;node<coordinates.length;node++){
+  const from=coordinates[node-1].slice(0,2),to=coordinates[node].slice(0,2);
+  const points=from[0]===to[0]?[from,to]:[from,[from[0],530],[to[0],530],to];
+  journey.push({points,stage:inboundStages[node-1],node});
+  if(node===2)journey.push({points:[[320,252],[550,252],[550,245],[698,245],[698,262],[550,262],[550,252],[320,252]],stage:1,node:2,mapping:true});
+ }
+ for(let node=7;node>=0;node--){
+  const from=[coordinates[node+1][0]+30,coordinates[node+1][1]],to=[coordinates[node][0]+30,coordinates[node][1]];
+  const points=from[0]===to[0]?[from,to]:[from,[from[0],540],[to[0],540],to];
+  if(node===7)points.unshift(coordinates[8].slice(0,2),[coordinates[8][0]+15,735]);
+  journey.push({points,stage:node<=1?7:6,node,response:true});
+ }
+}
+buildJourney();
+let leg=0,elapsed=0,lastTime=null,playing=false,frame=null;
+const play=document.getElementById('play'),packet=document.getElementById('packet'),packetLabel=document.getElementById('packet-label'),motionStatus=document.getElementById('motion-status');
+function pointOnRoute(points,fraction){const lengths=points.slice(1).map((p,i)=>Math.hypot(p[0]-points[i][0],p[1]-points[i][1]));let distance=lengths.reduce((a,b)=>a+b,0)*fraction;for(let i=0;i<lengths.length;i++){if(distance<=lengths[i]){const ratio=distance/lengths[i];return [points[i][0]+(points[i+1][0]-points[i][0])*ratio,points[i][1]+(points[i+1][1]-points[i][1])*ratio]}distance-=lengths[i]}return points[points.length-1]}
+function paint(fraction){const item=journey[leg];const [x,y]=pointOnRoute(item.points,fraction);packet.setAttribute('cx',x);packet.setAttribute('cy',y);packet.style.fill=item.response?'#ffd08b':'#75efcd';packetLabel.setAttribute('x',x);packetLabel.setAttribute('y',y-40);packetLabel.textContent=item.response?responseSummary():'GET 요청';[...mvcBoxes,...jspBoxes].forEach(box=>box.classList.remove('lit'));boxes.forEach((box,index)=>box.classList.toggle('lit',index===item.node));document.getElementById('mapper-box').setAttribute('stroke',item.mapping?'#8cf5d8':'#a0b2c9');motionStatus.textContent=item.mapping?'매핑 조회 · 결과를 받은 Adapter가 Engine을 호출합니다.':(item.response?'응답 / 호출 복귀 → ':'요청 / 호출 → ')+coordinates[item.node][2]}
+function pause(){playing=false;cancelAnimationFrame(frame);lastTime=null;play.textContent='▶ 이어서 재생'}
+function tick(time){if(!playing)return;if(lastTime!==null)elapsed+=(time-lastTime)*Number(document.getElementById('speed').value);lastTime=time;const duration=1800;while(elapsed>=duration&&leg<journey.length-1){elapsed-=duration;leg++}if(current!==journey[leg].stage){current=journey[leg].stage;render()}paint(Math.min(elapsed/duration,1));if(leg===journey.length-1&&elapsed>=duration){pause();play.textContent='↻ 다시 재생';motionStatus.textContent='완료 · '+responseSummary();return}frame=requestAnimationFrame(tick)}
+function placeAtStage(){
+  leg=journey.findIndex(item=>item.stage===current);
+  elapsed=1800;
+  paint(1);
+}
+play.onclick=()=>{if(playing){pause();return}if(leg===journey.length-1&&elapsed>=1800){leg=0;elapsed=0}playing=true;lastTime=null;play.textContent='Ⅱ 일시정지';frame=requestAnimationFrame(tick)};
+document.getElementById('prev').onclick=()=>{pause();current=Math.max(0,current-1);render();placeAtStage()};document.getElementById('next').onclick=()=>{pause();current=Math.min(stages.length-1,current+1);render();placeAtStage()};document.getElementById('reset').onclick=()=>{pause();current=0;leg=0;elapsed=0;render();paint(0);play.textContent='▶ 요청 보내기'};render();paint(0);
+
+function refreshMapperExample(){
+ const jsp=document.getElementById('request-mode').value==='jsp';
+ const data=jsp
+ ? '입력: Host=localhost:8080, URI=/hello.jsp\n\nMappingData (개념상 값)\n  host         = Host[localhost]\n  context      = Context[ROOT]  // 경로: ""\n  wrapper      = Wrapper[JspServlet]\n  matchType    = EXTENSION\n  wrapperPath  = /hello.jsp\n  pathInfo     = (없음)\n\n이후: Engine → Host → Context → JspServlet'
+ : '입력: Host=localhost:8080, URI=/orders/count\n\nMappingData (개념상 값)\n  host         = Host[localhost]\n  context      = Context[ROOT]  // 경로: ""\n  wrapper      = Wrapper[DispatcherServlet]\n  matchType    = DEFAULT\n  wrapperPath  = /orders/count\n  pathInfo     = (없음)\n\n이후: Engine → Host → Context → DispatcherServlet';
+ document.getElementById('mapper-example').textContent=data;
+}
+refreshMapperExample();
+function responseSummary(){
+ return document.getElementById('request-mode').value==='jsp'?'브라우저가 200 · HTML Hello JSP 수신':'브라우저가 200 · 본문 1 수신';
+}
+document.getElementById('request-mode').onchange=()=>{
+ pause();
+ const jsp=document.getElementById('request-mode').value==='jsp';
+ stages=jsp?jspStages:mvcStages;
+ coordinates=jsp?jspCoordinates:mvcCoordinates;
+ boxes=jsp?[...mvcBoxes.slice(0,6),...jspBoxes]:mvcBoxes;
+ buildJourney();current=0;leg=0;elapsed=0;
+  document.getElementById('mvc-choice').style.opacity=jsp?'.2':'1';
+  document.getElementById('jsp-choice').style.opacity=jsp?'1':'.2';
+ document.getElementById('request-example').textContent='GET '+(jsp?'/hello.jsp':'/orders/count')+' HTTP/1.1'+String.fromCharCode(13,10)+'Host: localhost:8080'+String.fromCharCode(13,10,13,10);
+ for(const prefix of ['request','response']){
+  document.getElementById('jsp-'+prefix+'-wire').style.opacity=jsp?'1':'.18';
+  document.getElementById('mvc-'+prefix+'-wire').style.opacity=jsp?'.18':'1';
+ }
+ refreshMapperExample();render();paint(0);play.textContent='▶ 요청 보내기';
+};
+const glossary = {
+  'service()':'Servlet.service(request, response)는 컨테이너가 서블릿에 요청 처리를 맡길 때 호출하는 메서드입니다. Tomcat Service 구성 요소 및 애플리케이션의 업무 Service와 각각 다른 개념입니다.',
+  'ProtocolHandler':'Connector가 선택한 Coyote 프로토콜 구현입니다. Endpoint의 네트워크 입출력과 HTTP Processor를 조직하고, 파싱 이후 Adapter를 통해 Catalina로 처리 요청을 전달합니다.',
+  'Jasper EL':'표현 언어를 평가하는 구현입니다. JSP에 포함된 표현식이 모델의 속성을 읽을 때 사용할 수 있습니다.',
+  'Tomcat WebSocket':'HTTP 업그레이드 후 WebSocket 연결과 메시지 처리를 지원하는 모듈입니다.',
+  'JULI':'Tomcat의 로깅 시스템입니다. 서버와 웹 앱의 로그를 구성하고 기록합니다.',
+  'Catalina HA':'여러 Tomcat 인스턴스의 세션 복제 등 고가용성 기능을 제공합니다.',
+  'Tribes':'클러스터 구성원 검색과 노드 간 메시지 전송에 사용하는 그룹 통신 라이브러리입니다.',
+  'Tomcat Server':'Tomcat 인스턴스 전체를 나타냅니다. 하나 이상의 Service를 묶고 서버 시작과 종료를 관리합니다.',
+  'Service':'하나 이상의 Connector와 정확히 하나의 Engine을 연결합니다. StandardService에는 Mapper와 MapperListener도 있어 같은 Service의 Connector들이 하나의 매핑 정보를 사용할 수 있습니다.',
+  'Coyote':'프로토콜 처리 계층입니다. Endpoint로 연결 및 I/O를 처리하고 Processor로 HTTP 메시지를 파싱·직렬화합니다. Catalina의 서블릿 실행과는 Adapter를 통해 연결됩니다.',
+  'Connector':'포트와 프로토콜을 설정하는 Tomcat 구성 요소입니다. 이 예시에서는 8080 포트로 들어온 HTTP 요청을 Coyote를 통해 처리합니다.',
+  'Endpoint':'소켓 연결 수락과 네트워크 I/O를 담당합니다. NIO 등의 구현은 읽기·쓰기 준비 이벤트와 소켓 처리 작업을 연결합니다. HTTP 의미를 해석하는 것은 Processor입니다.',
+  'HTTP Processor':'HTTP 요청 줄·헤더·메시지 처리 상태를 관리하고 CoyoteAdapter로 처리를 위임합니다. 응답을 HTTP 프로토콜 형식으로 기록하는 과정에도 참여합니다.',
+  'CoyoteAdapter':'Coyote 프로토콜 객체를 Catalina 요청·응답에 연결하고 URI 등을 후처리합니다. Service의 Mapper.map(...)을 사용해 MappingData를 채운 다음 Engine Pipeline의 첫 Valve를 호출합니다.',
+  'MapperListener':'Service 소유 Mapper를 배포 상태와 일치시키는 리스너입니다. Host·Context·Wrapper의 시작·중지 및 변경 이벤트에 따라 URL 매핑을 등록하거나 제거합니다.',
+  'Mapper':'Service가 소유한 URL 라우팅 테이블입니다. 요청의 Host 이름·URI를 기존 매핑 정보와 비교해 Host, Context, Wrapper 및 매칭 종류 등을 MappingData에 기록합니다. 직접 서블릿을 호출하지 않습니다.',
+  'Catalina':'카탈리나는 Tomcat의 서블릿 컨테이너입니다. 웹 앱과 서블릿의 생명주기를 관리하고 매핑된 서블릿으로 요청을 전달합니다.',
+  '컨테이너':'Catalina에서 요청을 처리하고 구성 요소의 생명주기를 관리하는 단위입니다. Engine, Host, Context, Wrapper가 이 계층을 이룹니다.',
+  'Engine':'Service 하나의 최상위 컨테이너입니다. 기본 Valve가 매핑된 Host의 Pipeline으로 호출을 넘깁니다.',
+  'Pipeline':'각 Container(Engine, Host, Context, Wrapper)에 하나씩 연결된 Valve 실행 체인입니다. 일반 Valve가 다음 호출을 계속하면 컨테이너별 기본 Valve가 마지막으로 실행됩니다. Engine·Host·Context는 다음 계층으로 전달하고 Wrapper는 FilterChain을 실행합니다.',
+  'Valve':'컨테이너 Pipeline 안의 처리 단계입니다. 접근 로그 등을 처리하거나 다음 Valve로 전달합니다. Engine·Host·Context의 기본 Valve는 다음 컨테이너를 호출하고, StandardWrapperValve는 서블릿을 준비해 FilterChain을 실행합니다.',
+  'Host':'도메인 이름에 대응하는 가상 호스트입니다. 하나의 Host 아래 여러 웹 앱을 배포할 수 있습니다. 그림에서는 localhost가 선택됩니다.',
+  'Context':'Host에 배포된 웹 애플리케이션 하나입니다. Context 경로와 서블릿 매핑·필터·앱 생명주기를 관리합니다. ROOT Context의 경로는 빈 문자열이며 URL에서 별도 접두사가 붙지 않습니다.',
+  'ROOT':'컨텍스트 경로가 빈 문자열("")인 루트 웹 애플리케이션입니다. /orders/count에서 앱 경로 접두사가 필요하지 않습니다.',
+  'Wrapper':'서블릿 정의 하나를 나타내는 Catalina 컨테이너입니다. 서블릿 초기화·생명주기를 관리하며 StandardWrapperValve가 요청의 FilterChain을 만들어 호출합니다.',
+  'FilterChain':'Wrapper 단계에서 현재 요청에 적용할 Servlet Filter들을 연결한 실행 체인입니다. Servlet API 계층이며 Catalina의 Valve Pipeline과 구별됩니다.',
+  '필터':'서블릿 호출 전후에 인증이나 로깅 등을 수행합니다. 다음 단계로 넘기거나 응답을 직접 보내 처리를 끝낼 수 있습니다.',
+  'DispatcherServlet':'Spring MVC의 진입 서블릿입니다. 서블릿 컨테이너에서 넘겨받은 요청에 맞는 컨트롤러를 찾아 호출하도록 조율합니다.',
+  '서블릿':'컨테이너가 초기화하고 요청마다 service 메서드를 호출하는 Java 구성 요소입니다.',
+  'Controller':'웹 요청을 애플리케이션 동작으로 연결합니다. 이 예에서는 주문 수 조회를 서비스에 요청합니다.',
+  '업무 서비스':'컨트롤러가 호출하는 애플리케이션 객체입니다. 여기서는 주문 수를 조회해 돌려줍니다.',
+  'Jasper':'Tomcat JSP 엔진입니다. JspServlet을 통해 JSP를 서블릿 Java 소스로 변환·컴파일하고, 생성된 서블릿의 실행을 관리합니다.',
+  'JspServlet':'Jasper가 제공하는 JSP 처리용 서블릿입니다. JSP 요청을 받아 해당 페이지의 컴파일과 실행을 조율합니다.',
+  '*.jsp':'파일명이 .jsp로 끝나는 요청에 적용하는 확장자 매핑 예시입니다.',
+  '클라이언트':'서버에 요청을 보내고 응답을 받는 프로그램입니다. 그림에서는 브라우저가 주문 수를 요청합니다.',
+  '브라우저':'HTTP 클라이언트입니다. 서버에 GET 요청을 보내고 상태 코드와 본문을 받습니다.',
+  'localhost':'현재 컴퓨터를 가리키는 호스트 이름입니다. :8080은 서버가 연결을 받는 포트입니다.',
+  'TCP':'클라이언트와 서버 사이에서 순서가 보장된 바이트 스트림을 제공하는 전송 프로토콜입니다.',
+  'HTTP':'메서드, 경로, 헤더로 요청을 표현하고 상태 코드, 헤더, 본문으로 응답하는 프로토콜입니다.',
+  '웹 앱 코드':'Tomcat이 실행하는 애플리케이션 영역입니다. 이 예에서는 디스패처와 주문 컨트롤러가 여기에 속합니다.'
+};
+const tip = document.getElementById('term-tip');
+let activeTerm;
+function hideTip() {
+  activeTerm?.removeAttribute('aria-describedby');
+  activeTerm = null;
+  tip.hidden = true;
+}
+function showTip(term) {
+  hideTip();
+  activeTerm = term;
+  const name = term.dataset.term;
+  tip.firstElementChild.textContent = name;
+  tip.lastElementChild.textContent = glossary[name];
+  tip.hidden = false;
+  term.setAttribute('aria-describedby', tip.id);
+  const box = term.getBoundingClientRect();
+  const left = Math.min(box.left, innerWidth - tip.offsetWidth - 8);
+  const below = box.bottom + 8;
+  tip.style.left = Math.max(8, left) + 'px';
+  tip.style.top = (below + tip.offsetHeight <= innerHeight ? below : Math.max(8, box.top - tip.offsetHeight - 8)) + 'px';
+}
+const terms = Object.keys(glossary).sort((a,b) => b.length-a.length);
+for (const label of document.querySelectorAll('.flow-map text')) {
+  const original = label.textContent;
+  const parts = [];
+  for (let i=0; i<original.length;) {
+    const word = terms.find(term => original.startsWith(term,i));
+    if (!word) { parts.push(original[i++]); continue; }
+    const span = document.createElementNS('http://www.w3.org/2000/svg','tspan');
+    span.textContent = word;
+    span.dataset.term = original.includes('Controller → Service') && word==='Service' ? '업무 서비스' : word;
+    span.setAttribute('tabindex','0');
+    span.setAttribute('role','button');
+    span.setAttribute('aria-label',span.dataset.term+' 설명');
+    span.onpointerenter = event => { if(event.pointerType !== 'touch') showTip(span); };
+    span.onpointerleave = () => { if(activeTerm===span && document.activeElement!==span) hideTip(); };
+    span.onfocus = span.onclick = () => showTip(span);
+    span.onblur = () => { if(activeTerm===span) hideTip(); };
+    span.onkeydown = event => { if(['Enter',' '].includes(event.key)){event.preventDefault();showTip(span);} };
+    parts.push(span);
+    i+=word.length;
+  }
+  if(parts.some(part => typeof part !== 'string')) label.replaceChildren(...parts);
+}
+document.addEventListener('pointerdown',event=>{if(!event.target.closest('[data-term]')) hideTip();});
+document.addEventListener('keydown',event=>{if(event.key==='Escape') hideTip();});
+window.addEventListener('scroll',hideTip,true);
+window.addEventListener('resize',hideTip);
+</script></body></html>

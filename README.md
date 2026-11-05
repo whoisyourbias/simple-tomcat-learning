@@ -7,7 +7,7 @@
 ## 처음 공부한다면
 
 1. Java 클래스·인터페이스·예외·스트림, 기본 HTTP 요청·응답 형식을 익힌다.
-2. [전체 구조](doc/00-overview/02-architecture.md)에서 네트워크·Coyote·Catalina의 책임을 읽는다.
+2. [전체 구조](doc/00-overview/02-architecture.md)와 [인터랙티브 구조도](doc/00-overview/tomcat-architecture.html)에서 네트워크·Coyote·Catalina의 책임을 읽는다. 구조도는 저장소를 내려받은 뒤 해당 HTML을 브라우저로 열어 요청·응답 애니메이션과 용어 설명을 확인한다. GitHub 파일 화면에서는 소스가 표시된다.
 3. [전체 로드맵](doc/plans/2026-11-05-tomcat-learning-roadmap.md)으로 7단계의 문제·완료 조건을 확인한다.
 4. [학습·검증·커밋 규칙](doc/reference/03-learning-workflow.md)에 따라 준비 단계의 JDK 21·Maven Wrapper·JUnit 환경을 구성한다.
 5. [1단계 계획](doc/plans/2026-11-05-step-01-socket.md)의 실험부터 시작한다. 이전 코드의 최소 수정으로 문제를 해결한 뒤 책임 분리의 이유를 기록한다.

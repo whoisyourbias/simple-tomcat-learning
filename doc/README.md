@@ -4,6 +4,7 @@
 
 - [현재 상태](00-overview/01-progress.md)
 - [Tomcat 전체 구조](00-overview/02-architecture.md)
+- [인터랙티브 구조도](00-overview/tomcat-architecture.html) — 내려받은 HTML을 브라우저로 열어 일반 요청·JSP 요청과 Mapper 조회 흐름을 확인한다.
 - [전체 7단계 로드맵](plans/2026-11-05-tomcat-learning-roadmap.md)
 
 ## 단계별 구현 계획
