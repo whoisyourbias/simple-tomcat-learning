@@ -2,7 +2,7 @@
 
 작은 서버를 개선하며 **Tomcat 내부 구성요소가 어떤 문제를 해결하는지** 배우는 프로젝트다. TCP 연결에서 출발해 Coyote·Catalina를 구현하고, 사용자 DispatcherServlet을 실행하는 내장 컨테이너까지 완주한다.
 
-**현재 저장소는 설계 문서만 제공한다. 실행 환경과 0~7단계 구현·테스트·학습 태그는 모두 예정이다.** 기준 소스는 Apache Tomcat 10.1.34로 고정한다.
+**0단계 빌드 환경 구성을 완료했다. JDK 21·Maven Wrapper·JUnit 환경 테스트와 JAR 생성을 검증했으며, 1~7단계 서버 구현은 예정이다.** 기준 소스는 Apache Tomcat 10.1.34로 고정한다.
 
 ## 처음 공부한다면
 
@@ -17,7 +17,7 @@
 
 | 단계 | 이전 문제·핵심 개념 | 완료 조건 | 계획·예정 태그 |
 |---|---|---|---|
-| 0 준비 | 빌드·검증 출발점 | 환경 테스트·JAR | [준비 절차](doc/reference/03-learning-workflow.md) · learn/step-00 |
+| 0 준비 | 빌드·검증 출발점 | 환경 테스트 2개 통과·JAR 생성 | [준비 절차](doc/reference/03-learning-workflow.md) · learn/step-00 |
 | 1 서버 | 연결과 서버의 수명 | 연속 요청·미완성 요청·종료 | [1단계](doc/plans/2026-11-05-step-01-socket.md) · learn/step-01 |
 | 2 Coyote | HTTP와 소켓 책임 분리 | 독립 파싱·오류 복구 | [2단계](doc/plans/2026-11-05-step-02-coyote.md) · learn/step-02 |
 | 3 Servlet | 응답과 인스턴스 소유권 | HTTP로 init/service/destroy 1/2/1 | [3단계](doc/plans/2026-11-05-step-03-servlet.md) · learn/step-03 |
@@ -26,9 +26,9 @@
 | 6 실행·종료 | 동시성·Lifecycle·구성 | 요청 격리·시작 실패·안전한 종료 | [6단계](doc/plans/2026-11-05-step-06-lifecycle.md) · learn/step-06 |
 | 7 내장 사용 | SimpleTomcat·DispatcherServlet | 두 업무 경로·JAR 실행 | [7단계](doc/plans/2026-11-05-step-07-embedded.md) · learn/step-07 |
 
-## 구현 후 사용할 명령
+## 빌드·검증 명령
 
-현재 Java 코드·Maven Wrapper는 없다. 다음은 0단계 구현 후 제공할 공통 검증 방법이다.
+JDK 21의 JAVA_HOME을 설정한 뒤 실행한다. 시스템 Maven 설치는 필요 없다. Windows PATH 설정과 실제 실행 결과는 [0단계 실행 기록](doc/00-overview/03-step-00-setup.md)을 참고한다.
 
 Windows PowerShell
 
@@ -42,11 +42,11 @@ macOS·Linux
 sh ./mvnw -B clean verify
 ```
 
-단계별 실행 클래스·curl·포트는 각 계획의 실행 항목을 따른다. 7단계에서 실행 가능한 JAR을 제공한다. 실제로 확인한 명령은 해당 단계 학습 문서와 README에 반영한다.
+현재 산출물은 target/simple-tomcat-0.0.1-SNAPSHOT.jar이며 애플리케이션 코드 없는 일반 JAR이다. 서버 실행·HTTP 실험은 1단계부터, 실행 가능한 서버 JAR은 7단계에서 제공한다.
 
 ## 완료 태그로 공부하기
 
-아래 명령은 해당 태그가 생성된 후 사용한다. 현재 학습 태그는 없다.
+생성된 준비 태그는 learn/step-00이다. learn/step-01~07은 해당 단계 완료 후 생성할 예정이다. 아래 1단계 이후 예제는 해당 태그 생성 후 사용한다.
 
 ```sh
 git clone https://github.com/whoisyourbias/simple-tomcat-learning.git

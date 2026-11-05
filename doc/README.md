@@ -7,7 +7,11 @@
 - [인터랙티브 구조도](00-overview/tomcat-architecture.html) — 내려받은 HTML을 브라우저로 열어 일반 요청·JSP 요청과 Mapper 조회 흐름을 확인한다.
 - [전체 7단계 로드맵](plans/2026-11-05-tomcat-learning-roadmap.md)
 
+- [0단계 환경 구성·실행 기록](00-overview/03-step-00-setup.md)
+
 ## 단계별 구현 계획
+
+0. [빌드 환경 준비](plans/2026-11-05-step-00-setup.md)
 
 1. [연결·요청·서버 수명](plans/2026-11-05-step-01-socket.md)
 2. [Coyote HTTP 처리](plans/2026-11-05-step-02-coyote.md)
