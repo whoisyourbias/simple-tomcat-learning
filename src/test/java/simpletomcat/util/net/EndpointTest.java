@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import org.junit.jupiter.api.Test;
+import simpletomcat.coyote.http11.Http11Processor;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,6 +23,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * 실제 TCP 연결로 순차 서버의 응답·오류 복구·종료·자원 반환을 검증한다.
  */
 class EndpointTest {
+    private static Endpoint newEndpoint() throws IOException {
+        return new Endpoint(0, new Http11Processor((request, response) -> response.setBody(BODY))::process);
+    }
+
     private static final String BODY = "안녕하세요, simple-tomcat!\n"; // 서버와 일치해야 하는 본문을 독립적인 기대값으로 둔다.
 
     /**
@@ -47,7 +52,7 @@ class EndpointTest {
     void waitsForSplitHeaderTerminator() throws Exception {
         try (RunningServer server = new RunningServer(); Socket client = connect(server.port())) { // 서버와 클라이언트 소켓을 함께 소유하고 블록 종료 때 모두 닫는다.
             send(client, "GET / HTTP/1.1\r\nHost: localhost\r\n\r"); // 헤더 종료 표식의 마지막 LF를 제외하고 전송한다.
-            server.awaitBlockedIn("readHeaders"); // 서버가 연결을 수락해 헤더 읽기에 진입한 뒤 다음 동작을 수행한다.
+            server.awaitBlockedIn("readLine"); // 서버가 연결을 수락해 헤더 읽기에 진입한 뒤 다음 동작을 수행한다.
             client.setSoTimeout(200); // 미완성 헤더 동안 응답이 없는지 200ms의 유한 관찰 구간을 설정한다.
             assertThrows(SocketTimeoutException.class, () -> client.getInputStream().read()); // 응답 바이트나 EOF 대신 읽기 제한 시간 초과가 발생해야 한다.
             client.setSoTimeout(3000); // 완성 후 응답을 읽을 때 사용할 3초 제한으로 되돌린다.
@@ -69,19 +74,20 @@ class EndpointTest {
                 client.shutdownOutput(); // 클라이언트 송신만 닫아 서버에는 EOF를 보내고 수신은 유지한다.
                 assertEquals(-1, client.getInputStream().read()); // 응답 데이터 없이 연결이 닫혀 EOF가 오는지 확인한다.
             }
-            assertResponse(request(server.port(), "GET / HTTP/1.1\r\n\r\n")); // 새 연결의 정상 응답으로 서버가 계속 요청을 처리함을 확인한다.
+            assertResponse(request(server.port(), "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n")); // 새 연결의 정상 응답으로 서버가 계속 요청을 처리함을 확인한다.
         }
     }
 
     /**
-     * 문법을 검사하지 않는 1단계의 고정 응답 정책을 명시적으로 검증한다.
+     * 2단계의 HTTP 문법 오류 응답 정책을 검증한다. 이전 정책은 learn/step-01에 보존한다.
      * @throws Exception 소켓 통신이나 서버 작업 대기에 실패한 경우
      */
-    // HTTP 문법이나 Host가 잘못돼도 헤더 끝이 있으면 1단계에서는 고정 200 응답을 받아야 한다.
+    // 잘못된 HTTP 요청은 400으로 종료되고 다음 정상 요청은 200이어야 한다.
     @Test
-    void respondsWithoutValidatingHttp() throws Exception {
+    void rejectsMalformedHttp() throws Exception {
         try (RunningServer server = new RunningServer()) { // 임의 포트 서버를 준비하고 테스트 종료 시 서버와 작업자를 정리한다.
-            assertResponse(request(server.port(), "not-http\r\n\r\n")); // HTTP 문법이 틀려도 종료 표식이 있으면 200을 받는 현재 정책을 확인한다.
+            assertTrue(new String(request(server.port(), "not-http\r\n\r\n"), StandardCharsets.UTF_8).startsWith("HTTP/1.1 400 Bad Request"));
+            assertResponse(request(server.port(), "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"));
         }
     }
 
@@ -95,10 +101,10 @@ class EndpointTest {
         try (RunningServer server = new RunningServer()) { // 임의 포트 서버를 준비하고 테스트 종료 시 서버와 작업자를 정리한다.
             try (Socket client = connect(server.port())) { // 이번 시나리오의 클라이언트를 연결하고 종료 시 소켓을 닫는다.
                 send(client, "GET / HTTP/1.1\r\n"); // 서버가 계속 읽어야 하는 미완성 요청을 전송한다.
-                server.awaitBlockedIn("readHeaders"); // 서버가 연결을 수락해 헤더 읽기에 진입한 뒤 다음 동작을 수행한다.
+                server.awaitBlockedIn("readLine"); // 서버가 연결을 수락해 헤더 읽기에 진입한 뒤 다음 동작을 수행한다.
                 client.setSoLinger(true, 0); // 이 소켓이 닫힐 때 RST를 보내 서버의 연결 오류 경로를 실행한다.
             }
-            assertResponse(request(server.port(), "GET / HTTP/1.1\r\n\r\n")); // 새 연결의 정상 응답으로 서버가 계속 요청을 처리함을 확인한다.
+            assertResponse(request(server.port(), "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n")); // 새 연결의 정상 응답으로 서버가 계속 요청을 처리함을 확인한다.
         }
     }
 
@@ -126,7 +132,7 @@ class EndpointTest {
     void closesWhileReading() throws Exception {
         try (RunningServer server = new RunningServer(); Socket client = connect(server.port())) { // 서버와 클라이언트 소켓을 함께 소유하고 블록 종료 때 모두 닫는다.
             send(client, "GET / HTTP/1.1\r\n"); // 서버가 계속 읽어야 하는 미완성 요청을 전송한다.
-            server.awaitBlockedIn("readHeaders"); // 서버가 연결을 수락해 헤더 읽기에 진입한 뒤 다음 동작을 수행한다.
+            server.awaitBlockedIn("readLine"); // 서버가 연결을 수락해 헤더 읽기에 진입한 뒤 다음 동작을 수행한다.
             server.stop(); // 서버 소켓을 닫고 실행 작업이 끝날 때까지 유한 시간 기다린다.
             assertEquals(-1, client.getInputStream().read()); // 응답 데이터 없이 연결이 닫혀 EOF가 오는지 확인한다.
             assertPortReleased(server.port()); // 동일 포트에 새 수신 소켓을 바인딩하여 포트 반환을 확인한다.
@@ -140,7 +146,7 @@ class EndpointTest {
     // serve 전에 close하면 serve는 반환하고 반복 close도 가능하며 포트가 반환돼야 한다.
     @Test
     void closesBeforeServing() throws Exception {
-        try (Endpoint endpoint = new Endpoint(0)) { // 실행 루프를 시작하지 않고 임의 포트에 바인딩한 서버만 생성한다.
+        try (Endpoint endpoint = newEndpoint()) { // 실행 루프를 시작하지 않고 임의 포트에 바인딩한 서버만 생성한다.
             int port = endpoint.getPort(); // 종료 뒤 재바인딩할 실제 포트를 기억한다.
             endpoint.close(); // Endpoint가 소유한 수신 소켓과 현재 연결을 정리한다.
             endpoint.serve(); // 이미 닫은 객체의 첫 serve 호출이 수락 대기 없이 반환하는지 확인한다.
@@ -158,7 +164,7 @@ class EndpointTest {
     void rejectsSecondServe() throws Exception {
         try (RunningServer server = new RunningServer()) { // 임의 포트 서버를 준비하고 테스트 종료 시 서버와 작업자를 정리한다.
             assertThrows(IllegalStateException.class, server.endpoint::serve); // 기존 serve가 실행 중일 때 두 번째 실행이 거부되는지 확인한다.
-            assertResponse(request(server.port(), "GET / HTTP/1.1\r\n\r\n")); // 새 연결의 정상 응답으로 서버가 계속 요청을 처리함을 확인한다.
+            assertResponse(request(server.port(), "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n")); // 새 연결의 정상 응답으로 서버가 계속 요청을 처리함을 확인한다.
         }
     }
 
@@ -279,7 +285,7 @@ class EndpointTest {
      * 테스트용 서버와 실행 스레드를 소유하며 유한 대기와 명시적 정리를 제공한다.
      */
     private static final class RunningServer implements AutoCloseable {
-        final Endpoint endpoint = new Endpoint(0); // 테스트별로 충돌하지 않는 임의 포트의 서버를 소유한다.
+        final Endpoint endpoint = newEndpoint(); // 테스트별로 충돌하지 않는 임의 포트의 서버를 소유한다.
         final ExecutorService worker = Executors.newSingleThreadExecutor(); // 블로킹 serve 루프를 테스트 스레드와 분리해서 실행한다.
         final AtomicReference<Thread> thread = new AtomicReference<>(); // 서버 작업자의 스택을 다른 스레드에서 관찰할 수 있게 참조를 공유한다.
         final Future<?> task; // 서버 작업 완료와 예외를 관찰할 Future를 보관한다.
@@ -329,7 +335,7 @@ class EndpointTest {
                 }
                 StackTraceElement[] stack = thread.get().getStackTrace(); // 시작 신호로 공개된 서버 스레드의 현재 호출 스택을 읽는다.
                 boolean inEndpoint = Arrays.stream(stack).anyMatch(frame -> // 지정된 Endpoint 메서드가 호출 스택에 있는지 조사한다.
-                        frame.getClassName().equals(Endpoint.class.getName()) && frame.getMethodName().equals(method)); // 다른 클래스의 동명 메서드를 제외하고 클래스와 메서드 이름을 함께 비교한다.
+                        (frame.getClassName().equals(Endpoint.class.getName()) || frame.getClassName().startsWith(Http11Processor.class.getName())) && frame.getMethodName().equals(method)); // 다른 클래스의 동명 메서드를 제외하고 클래스와 메서드 이름을 함께 비교한다.
                 boolean inSocket = Arrays.stream(stack).anyMatch(frame -> // 실제 소켓 I/O 경로도 스택에 있는지 함께 조사한다.
                         frame.getClassName().startsWith("sun.nio.ch.") // 이 테스트 환경에서 사용하는 JDK 소켓 구현의 프레임만 선택한다.
                                 && (frame.getMethodName().contains("accept") // 소켓 구현의 수락 대기 경로를 후보로 인정한다.
