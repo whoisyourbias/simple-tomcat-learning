@@ -41,3 +41,6 @@ Endpoint의 HTTP 처리를 Processor·Adapter로 분리했다. CRLF·단일 SP·
 - **운영 확장** — [Http2Protocol](https://github.com/apache/tomcat/blob/10.1.34/java/org/apache/coyote/http2/Http2Protocol.java), [WsHttpUpgradeHandler](https://github.com/apache/tomcat/blob/10.1.34/java/org/apache/tomcat/websocket/server/WsHttpUpgradeHandler.java), [SimpleTcpCluster](https://github.com/apache/tomcat/blob/10.1.34/java/org/apache/catalina/ha/tcp/SimpleTcpCluster.java), [JmxEnabled](https://github.com/apache/tomcat/blob/10.1.34/java/org/apache/catalina/JmxEnabled.java)를 읽기 시작점으로 둔다. 상세 동작은 조사 후 설명 자료에 기록한다.
 
 설명 자료는 역할·개입 위치·상태·이번 구현에서 없는 보장을 포함한다. 미조사 분기를 확인한 사실처럼 서술하지 않는다. 구현 과정에서 새 차이가 생기면 실제 동작·예정 동작·이유·영향·검증·후속 여부를 표에 추가한다.
+# 2026-11-10 추가 — 3단계 현재 제약
+
+이하 기존 범위·과거 기록은 보존한다. 3단계에서 최소 Servlet 계약·Wrapper·실제 HTTP 연결을 구현했다. 모든 URI는 고정 Wrapper로 전달한다. 사용 중 unload는 즉시 거부하며 실행자가 요청 처리 종료 뒤 해제해야 한다. Jakarta 호환·UnavailableException·필터·다중 앱·전체 Lifecycle은 미구현이다. 근거와 검증은 [3단계 기록](../03-servlet/01-servlet-and-wrapper.md), 상세 차이는 [이관 계획](../plans/2026-11-10-step-03-04-implementation.md)을 따른다.

@@ -2,7 +2,7 @@
 
 작은 서버를 개선하며 **Tomcat 내부 구성요소가 어떤 문제를 해결하는지** 배우는 프로젝트다. TCP 연결에서 출발해 Coyote·Catalina를 구현하고, 사용자 DispatcherServlet을 실행하는 내장 컨테이너까지 완주한다.
 
-**0~2단계를 구현했다. 전체 테스트 53개·clean verify·JAR 생성·실제 HTTP 정상/오류/HEAD·종료 후 포트 반환을 검증했다. 3~7단계는 예정이다.** 기준 소스는 Apache Tomcat 10.1.34로 고정한다.
+**0~3단계를 구현했다. 전체 테스트 73개·clean verify·JAR 생성·실제 HTTP 서블릿 호출·오류 복구·생명주기·종료 후 포트 반환을 검증했다. 4~7단계는 예정이다.** 기준 소스는 Apache Tomcat 10.1.34로 고정한다.
 
 ## 처음 공부한다면
 
@@ -10,7 +10,7 @@
 2. [전체 구조](doc/00-overview/02-architecture.md)와 [인터랙티브 구조도](doc/00-overview/tomcat-architecture.html)에서 네트워크·Coyote·Catalina의 책임을 읽는다. 구조도는 저장소를 내려받은 뒤 해당 HTML을 브라우저로 열어 요청·응답 애니메이션과 용어 설명을 확인한다. GitHub 파일 화면에서는 소스가 표시된다.
 3. [전체 로드맵](doc/plans/2026-11-05-tomcat-learning-roadmap.md)으로 7단계의 문제·완료 조건을 확인한다.
 4. [학습·검증·커밋 규칙](doc/reference/03-learning-workflow.md)에 따라 준비 단계의 JDK 21·Maven Wrapper·JUnit 환경을 구성한다.
-5. [1단계 학습·실행 기록](doc/01-socket/01-endpoint.md)의 연결·종료 실험부터 시작한다. [2단계 학습·실행 기록](doc/02-coyote/01-http-processing.md)에서 HTTP 책임 분리와 Tomcat 차이를 확인한다. 다음 구현은 3단계 Servlet이다.
+5. [1단계 기록](doc/01-socket/01-endpoint.md)에서 연결·종료, [2단계 기록](doc/02-coyote/01-http-processing.md)에서 HTTP 책임 분리, [3단계 기록](doc/03-servlet/01-servlet-and-wrapper.md)에서 Servlet 생명주기와 실제 HTTP 연결을 확인한다. 다음 구현은 4단계 컨테이너다.
 6. 테스트·HTTP 실험 후 실제 Tomcat 메서드와 호출 순서·상태 변화·오류 처리·자원 소유권을 대조한다.
 
 ## 고정된 학습 단계
@@ -54,7 +54,7 @@ sh ./mvnw -B clean verify
 
 ## 완료 태그로 공부하기
 
-완료 태그는 learn/step-00, learn/step-01, learn/step-02다. learn/step-03~07은 해당 단계 검증 후 생성할 예정이다.
+완료 태그는 learn/step-00~03이다. learn/step-04~07은 해당 단계 검증 후 생성할 예정이다.
 
 ```sh
 git clone https://github.com/whoisyourbias/simple-tomcat-learning.git

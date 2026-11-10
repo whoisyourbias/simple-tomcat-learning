@@ -11,6 +11,9 @@
 
 - [0단계 환경 구성·실행 기록](00-overview/03-step-00-setup.md)
 - [1단계 소켓 서버·실행 기록](01-socket/01-endpoint.md)
+- [2단계 HTTP 처리·실행 기록](02-coyote/01-http-processing.md)
+- [3단계 Servlet·Wrapper·HTTP 실행 기록](03-servlet/01-servlet-and-wrapper.md)
+- [3·4단계 이관·구현 계획](plans/2026-11-10-step-03-04-implementation.md)
 
 ## 단계별 구현 계획
 

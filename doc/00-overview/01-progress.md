@@ -56,3 +56,18 @@
 | 3~7단계 | 예정, Servlet·매핑·동시성·Lifecycle 미구현 |
 
 명령·실패 이력·Tomcat 소스 대조·소유권·남은 제약은 [2단계 학습·실행 기록](../02-coyote/01-http-processing.md)에 남겼다.
+
+## 2026-11-10 — 3단계 Servlet·Wrapper·HTTP 연결
+
+앞선 기록은 당시 상태로 보존한다. 사용자 요청에 따라 다른 폴더의 동일 기능을 비교·이관하고 이 저장소의 HTTP 완료 조건을 보완했다.
+
+| 항목 | 최신 상태 |
+|---|---|
+| Servlet·생명주기 | 최소 계약·Wrapper 지연 init·공유·대여 반환·유휴 unload |
+| HTTP 연결 | connector Request/Response·고정 Wrapper CoyoteAdapter·ServletServer |
+| 테스트 | 기존 53 + Wrapper 16 + 실제 HTTP 4 = 73개, clean verify·JAR 생성 성공 |
+| JAR 실험 | 두 HTTP 요청 1/2/0, 500·HEAD·복구, 종료 후 destroy 1회·포트 재사용 |
+| 완료 경계 | 코드·테스트·학습 문서를 포함한 learn/step-03 |
+| 4~7단계 | 예정. 전체 Lifecycle·동시 처리·Filter·내장 API 없음 |
+
+실제 실패·성공·검증 범위와 재현 방법은 [3단계 기록](../03-servlet/01-servlet-and-wrapper.md)에 남겼다.
