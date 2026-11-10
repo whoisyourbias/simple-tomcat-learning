@@ -1,0 +1,102 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< org.example:simple-tomcat >----------------------
+[INFO] Building simple-tomcat-learning 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ simple-tomcat ---
+[INFO] Deleting D:\spring-study\simple-tomcat-learning\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ simple-tomcat ---
+[INFO] skip non existing resourceDirectory D:\spring-study\simple-tomcat-learning\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ simple-tomcat ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 58 source files with javac [debug release 21] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ simple-tomcat ---
+[INFO] skip non existing resourceDirectory D:\spring-study\simple-tomcat-learning\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ simple-tomcat ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 32 source files with javac [debug release 21] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ simple-tomcat ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running org.example.tomcat.BuildEnvironmentTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.074 s -- in org.example.tomcat.BuildEnvironmentTest
+[INFO] Running simpletomcat.catalina.connector.ConnectorTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.040 s -- in simpletomcat.catalina.connector.ConnectorTest
+[INFO] Running simpletomcat.catalina.connector.ContainerHttpTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.145 s -- in simpletomcat.catalina.connector.ContainerHttpTest
+[INFO] Running simpletomcat.catalina.connector.FilterHttpTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.062 s -- in simpletomcat.catalina.connector.FilterHttpTest
+[INFO] Running simpletomcat.catalina.connector.LifecycleHttpTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.052 s -- in simpletomcat.catalina.connector.LifecycleHttpTest
+[INFO] Running simpletomcat.catalina.connector.ServletHttpTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.046 s -- in simpletomcat.catalina.connector.ServletHttpTest
+[INFO] Running simpletomcat.catalina.core.ApplicationFilterChainTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in simpletomcat.catalina.core.ApplicationFilterChainTest
+[INFO] Running simpletomcat.catalina.core.ApplicationLifecycleTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in simpletomcat.catalina.core.ApplicationLifecycleTest
+[INFO] Running simpletomcat.catalina.core.ContainerFreezeTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in simpletomcat.catalina.core.ContainerFreezeTest
+[INFO] Running simpletomcat.catalina.core.ContainerHierarchyTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in simpletomcat.catalina.core.ContainerHierarchyTest
+[INFO] Running simpletomcat.catalina.core.ContainerInvocationTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.084 s -- in simpletomcat.catalina.core.ContainerInvocationTest
+[INFO] Running simpletomcat.catalina.core.FilterInvocationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in simpletomcat.catalina.core.FilterInvocationTest
+[INFO] Running simpletomcat.catalina.core.FilterServerLifecycleTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in simpletomcat.catalina.core.FilterServerLifecycleTest
+[INFO] Running simpletomcat.catalina.core.LifecycleControlTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in simpletomcat.catalina.core.LifecycleControlTest
+[INFO] Running simpletomcat.catalina.core.LifecycleShutdownTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.671 s -- in simpletomcat.catalina.core.LifecycleShutdownTest
+[INFO] Running simpletomcat.catalina.core.StandardContextFilterTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in simpletomcat.catalina.core.StandardContextFilterTest
+[INFO] Running simpletomcat.catalina.core.StandardPipelineTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 s -- in simpletomcat.catalina.core.StandardPipelineTest
+[INFO] Running simpletomcat.catalina.core.StandardServerTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in simpletomcat.catalina.core.StandardServerTest
+[INFO] Running simpletomcat.catalina.core.StandardServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in simpletomcat.catalina.core.StandardServiceTest
+[INFO] Running simpletomcat.catalina.core.StandardWrapperTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.053 s -- in simpletomcat.catalina.core.StandardWrapperTest
+[INFO] Running simpletomcat.catalina.core.StandardWrapperValveTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.029 s -- in simpletomcat.catalina.core.StandardWrapperValveTest
+[INFO] Running simpletomcat.catalina.mapper.MapperTest
+[INFO] Tests run: 32, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.109 s -- in simpletomcat.catalina.mapper.MapperTest
+[INFO] Running simpletomcat.coyote.http11.ConcurrentHttp11ProtocolTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in simpletomcat.coyote.http11.ConcurrentHttp11ProtocolTest
+[INFO] Running simpletomcat.coyote.http11.Http11ProcessorTest
+[INFO] Tests run: 40, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.112 s -- in simpletomcat.coyote.http11.Http11ProcessorTest
+[INFO] Running simpletomcat.coyote.http11.Http11ProtocolTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.034 s -- in simpletomcat.coyote.http11.Http11ProtocolTest
+[INFO] Running simpletomcat.support.HttpTestServerTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in simpletomcat.support.HttpTestServerTest
+[INFO] Running simpletomcat.util.DeadlineTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in simpletomcat.util.DeadlineTest
+[INFO] Running simpletomcat.util.net.ConcurrentEndpointTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.200 s -- in simpletomcat.util.net.ConcurrentEndpointTest
+[INFO] Running simpletomcat.util.net.EndpointTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.603 s -- in simpletomcat.util.net.EndpointTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 194, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ simple-tomcat ---
+[INFO] Building jar: D:\spring-study\simple-tomcat-learning\target\simple-tomcat-0.0.1-SNAPSHOT.jar
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  10.884 s
+[INFO] Finished at: 2026-11-10T17:54:40+09:00
+[INFO] ------------------------------------------------------------------------

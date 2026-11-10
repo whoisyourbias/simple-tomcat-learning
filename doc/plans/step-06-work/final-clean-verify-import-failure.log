@@ -1,0 +1,56 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< org.example:simple-tomcat >----------------------
+[INFO] Building simple-tomcat-learning 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ simple-tomcat ---
+[INFO] Deleting D:\spring-study\simple-tomcat-learning\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ simple-tomcat ---
+[INFO] skip non existing resourceDirectory D:\spring-study\simple-tomcat-learning\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ simple-tomcat ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 58 source files with javac [debug release 21] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ simple-tomcat ---
+[INFO] skip non existing resourceDirectory D:\spring-study\simple-tomcat-learning\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ simple-tomcat ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 32 source files with javac [debug release 21] to target\test-classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /D:/spring-study/simple-tomcat-learning/src/test/java/simpletomcat/catalina/core/ContainerFreezeTest.java:[28,37] cannot find symbol
+  symbol:   class ValveBase
+  location: class simpletomcat.catalina.core.ContainerFreezeTest
+[ERROR] /D:/spring-study/simple-tomcat-learning/src/test/java/simpletomcat/catalina/core/ContainerFreezeTest.java:[29,56] cannot find symbol
+  symbol: class ContainerRequest
+[ERROR] /D:/spring-study/simple-tomcat-learning/src/test/java/simpletomcat/catalina/core/ContainerFreezeTest.java:[29,76] cannot find symbol
+  symbol: class ServletResponse
+[INFO] 3 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  4.964 s
+[INFO] Finished at: 2026-11-10T17:52:05+09:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:testCompile (default-testCompile) on project simple-tomcat: Compilation failure: Compilation failure: 
+[ERROR] /D:/spring-study/simple-tomcat-learning/src/test/java/simpletomcat/catalina/core/ContainerFreezeTest.java:[28,37] cannot find symbol
+[ERROR]   symbol:   class ValveBase
+[ERROR]   location: class simpletomcat.catalina.core.ContainerFreezeTest
+[ERROR] /D:/spring-study/simple-tomcat-learning/src/test/java/simpletomcat/catalina/core/ContainerFreezeTest.java:[29,56] cannot find symbol
+[ERROR]   symbol: class ContainerRequest
+[ERROR] /D:/spring-study/simple-tomcat-learning/src/test/java/simpletomcat/catalina/core/ContainerFreezeTest.java:[29,76] cannot find symbol
+[ERROR]   symbol: class ServletResponse
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

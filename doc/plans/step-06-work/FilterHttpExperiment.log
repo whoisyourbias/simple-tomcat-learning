@@ -1,0 +1,10 @@
+GET /shop/hello -> 200
+GET /admin/hello -> 200
+GET /shop/blocked -> 200
+GET /shop/filter-fail -> 500
+GET /shop/hello -> 200
+GET /shop/servlet-fail -> 500
+GET /shop/hello -> 200
+HEAD /shop/hello -> 200
+GET /shop/WEB-INF/config -> 404
+PASS: 9 curl cases, filter lifecycle, repeated cleanup, port rebind

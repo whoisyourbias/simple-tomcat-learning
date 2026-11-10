@@ -1,0 +1,42 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< org.example:simple-tomcat >----------------------
+[INFO] Building simple-tomcat-learning 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ simple-tomcat ---
+[INFO] skip non existing resourceDirectory D:\spring-study\simple-tomcat-learning\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ simple-tomcat ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 58 source files with javac [debug release 21] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ simple-tomcat ---
+[INFO] skip non existing resourceDirectory D:\spring-study\simple-tomcat-learning\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ simple-tomcat ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 32 source files with javac [debug release 21] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ simple-tomcat ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running simpletomcat.catalina.core.ApplicationLifecycleTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.100 s -- in simpletomcat.catalina.core.ApplicationLifecycleTest
+[INFO] Running simpletomcat.catalina.core.ContainerFreezeTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in simpletomcat.catalina.core.ContainerFreezeTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  7.863 s
+[INFO] Finished at: 2026-11-10T17:53:48+09:00
+[INFO] ------------------------------------------------------------------------

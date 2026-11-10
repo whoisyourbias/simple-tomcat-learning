@@ -9,6 +9,7 @@
 - [상세 설명 가독성·정합성 수정과 검증 기록](plans/2026-11-06-architecture-detail-readability.md)
 - [전체 7단계 로드맵](plans/2026-11-05-tomcat-learning-roadmap.md)
 - [2026-11-10 상태 재확인·5단계 상세 구현 계획·6/7단계 착수 조건](plans/2026-11-10-next-implementation.md)
+- [2026-11-10 6단계 상세 계획·원본 조사·동시성/종료 정책·테스트 순서](plans/2026-11-10-step-06-implementation.md) — 구현 후 실제 결과는 6단계 학습 기록 참고
 
 - [0단계 환경 구성·실행 기록](00-overview/03-step-00-setup.md)
 - [1단계 소켓 서버·실행 기록](01-socket/01-endpoint.md)
@@ -16,6 +17,7 @@
 - [3단계 Servlet·Wrapper·HTTP 실행 기록](03-servlet/01-servlet-and-wrapper.md)
 - [4단계 컨테이너·Mapper·Pipeline·curl 실행 기록](04-container/01-mapping-and-pipeline.md)
 - [5단계 Context Filter·요청별 체인·HTTP 실행 기록](05-filter/01-filter-chain.md)
+- [6단계 동시 요청·Lifecycle·종료/재시도 실행 기록](06-lifecycle/01-concurrency-and-lifecycle.md)
 - [3·4단계 이관·구현 계획](plans/2026-11-10-step-03-04-implementation.md)
 
 ## 단계별 구현 계획

@@ -1,0 +1,71 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< org.example:simple-tomcat >----------------------
+[INFO] Building simple-tomcat-learning 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ simple-tomcat ---
+[INFO] skip non existing resourceDirectory D:\spring-study\simple-tomcat-learning\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ simple-tomcat ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 58 source files with javac [debug release 21] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ simple-tomcat ---
+[INFO] skip non existing resourceDirectory D:\spring-study\simple-tomcat-learning\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ simple-tomcat ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 32 source files with javac [debug release 21] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ simple-tomcat ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running simpletomcat.catalina.core.ApplicationLifecycleTest
+[ERROR] Tests run: 2, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.129 s <<< FAILURE! -- in simpletomcat.catalina.core.ApplicationLifecycleTest
+[ERROR] simpletomcat.catalina.core.ApplicationLifecycleTest.retriesCleanupWhenExecutorCreationOrSubmissionFails -- Time elapsed: 0.067 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <simpletomcat.catalina.LifecycleException> but was: <java.lang.IllegalStateException>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128)
+	at simpletomcat.catalina.core.ApplicationLifecycleTest.retriesCleanupWhenExecutorCreationOrSubmissionFails(ApplicationLifecycleTest.java:59)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.IllegalStateException: executor creation
+	at simpletomcat.catalina.core.ApplicationLifecycleTest.lambda$retriesCleanupWhenExecutorCreationOrSubmissionFails$2(ApplicationLifecycleTest.java:53)
+	at simpletomcat.catalina.core.ApplicationLifecycle.cleanup(ApplicationLifecycle.java:47)
+	at simpletomcat.catalina.core.ApplicationLifecycleTest.lambda$retriesCleanupWhenExecutorCreationOrSubmissionFails$3(ApplicationLifecycleTest.java:59)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+	... 6 more
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   ApplicationLifecycleTest.retriesCleanupWhenExecutorCreationOrSubmissionFails:59 Unexpected exception type thrown, expected: <simpletomcat.catalina.LifecycleException> but was: <java.lang.IllegalStateException>
+[INFO] 
+[ERROR] Tests run: 2, Failures: 1, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  7.702 s
+[INFO] Finished at: 2026-11-10T17:53:21+09:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.2:test (default-test) on project simple-tomcat: There are test failures.
+[ERROR] 
+[ERROR] See D:\spring-study\simple-tomcat-learning\target\surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

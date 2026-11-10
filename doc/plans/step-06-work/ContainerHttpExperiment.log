@@ -1,0 +1,35 @@
+shop-status init
+localhost /shop/status -> 200
+admin-status init
+localhost /admin/status -> 200
+other-status init
+other.local /shop/status -> 200
+nested-status init
+LOCALHOST:8080 /shop/deep/status -> 200
+exact init
+localhost /shop/api/exact.do -> 200
+deep-api init
+localhost /shop/api/deep/a.do -> 200
+api init
+localhost /shop/api/a.do -> 200
+extension init
+localhost /shop/a.do -> 200
+default init
+unknown /shop/other -> 200
+localhost /shopper/status -> 404
+localhost /admin/missing -> 404
+localhost /shop/WEB-INF/config -> 404
+localhost /shop/%73tatus -> 400
+localhost /shop/../admin/status -> 400
+localhost /shop/fail -> 500
+localhost /shop/status -> 200
+shop-status destroy
+api destroy
+deep-api destroy
+exact destroy
+extension destroy
+default destroy
+admin-status destroy
+nested-status destroy
+other-status destroy
+PASS: 16 curl cases, repeated unload, port rebind

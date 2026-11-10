@@ -1,5 +1,9 @@
 # Tomcat 10.1.34 공식 소스 지도
 
+2026-11-10 6단계 구현 결과: [동시성·수명 학습 기록](../06-lifecycle/01-concurrency-and-lifecycle.md)에 실제 호출·소유권·검증·원본 차이를 남겼다. 아래 조사 시점 기록은 보존한다.
+
+2026-11-10 6단계 계획 조사: StandardServer·StandardService·Connector·LifecycleBase/State, Endpoint·Acceptor·NIO·ProtocolHandler 처리 경로, TaskQueue/Executor, Context·Wrapper·HTTP Processor의 고정 소스 14개를 확인했다. [6단계 상세 계획](../plans/2026-11-10-step-06-implementation.md)에 실제 메서드·시작/종료·오류·소유권, SHA-256, 프로젝트 차이와 미조사 영역을 기록했다. 6단계 구현·실행 검증은 아직 예정이며, 아래 과거 조사 기록을 보존한다.
+
 2026-11-10 5단계 구현에서는 S8 외 ApplicationFilterFactory.createFilterChain, ApplicationFilterConfig의 생성자/getFilter/initFilter/release, StandardContext.filterStart/filterStop/startInternal/stopInternal을 고정 소스로 조사했다. 책임·상태·실패·종료와 원본 SHA-256은 [상세 계획](../plans/2026-11-10-next-implementation.md#3-tomcat-10134-고정-소스-조사), 실제 차이·검증은 [5단계 기록](../05-filter/01-filter-chain.md)을 따른다.
 
 릴리스 태그 `10.1.34`에 고정한다. 최신 배포 권장 버전을 뜻하지 않는다. 클래스명과 함께 메서드의 책임·호출 순서·상태·오류·자원 소유권을 읽는다.

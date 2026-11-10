@@ -1,18 +1,38 @@
 package simpletomcat.catalina.core;
 
-import java.util.Objects;
 import simpletomcat.catalina.Pipeline;
 import simpletomcat.catalina.Valve;
 
+import java.util.Objects;
+
 /** 일반 Valve를 등록 순서로 연결하고 기본 Valve를 항상 마지막에 둔다. */
 public final class StandardPipeline implements Pipeline {
-    /**
-     * 첫 일반 Valve. 일반 Valve가 없으면 null이다.
-     */
+    /** 첫 일반 Valve. 일반 Valve가 없으면 null이다. */
     private Valve first;
-    /**
-     * 일반 Valve 체인 뒤에 배치되는 기본 Valve.
-     */
+
+    private boolean frozen;
+
+    @Override
+    public boolean isFrozen() {
+        return frozen;
+    }
+
+    @Override
+    public void freeze() {
+        if (frozen) return;
+        var seen =
+                java.util.Collections.newSetFromMap(
+                        new java.util.IdentityHashMap<Valve, Boolean>());
+        for (Valve v = getFirst(); v != null; v = v.getNext()) {
+            if (!seen.add(v) || v == basic && v.getNext() != null)
+                throw new IllegalStateException("Invalid Valve chain");
+        }
+        if (!seen.contains(basic)) throw new IllegalStateException("Missing basic Valve");
+        for (Valve v : seen) v.freeze();
+        frozen = true;
+    }
+
+    /** 일반 Valve 체인 뒤에 배치되는 기본 Valve. */
     private Valve basic;
 
     /**
@@ -33,7 +53,9 @@ public final class StandardPipeline implements Pipeline {
      * @return 요청 진입 Valve
      */
     @Override
-    public Valve getFirst() { return first == null ? basic : first; }
+    public Valve getFirst() {
+        return first == null ? basic : first;
+    }
 
     /**
      * 체인의 마지막 기본 Valve를 반환한다.
@@ -41,7 +63,9 @@ public final class StandardPipeline implements Pipeline {
      * @return 기본 Valve
      */
     @Override
-    public Valve getBasic() { return basic; }
+    public Valve getBasic() {
+        return basic;
+    }
 
     /**
      * 새 일반 Valve를 기존 일반 체인의 끝과 기본 Valve 사이에 추가한다.
@@ -52,6 +76,7 @@ public final class StandardPipeline implements Pipeline {
      */
     @Override
     public void addValve(Valve valve) {
+        if (frozen) throw new IllegalStateException("Pipeline is frozen");
         validateNewValve(valve);
         if (first == null) {
             first = valve;
@@ -70,9 +95,14 @@ public final class StandardPipeline implements Pipeline {
      */
     @Override
     public void setBasic(Valve valve) {
-        if (valve == basic) { return; }
+        if (frozen) throw new IllegalStateException("Pipeline is frozen");
+        if (valve == basic) {
+            return;
+        }
         validateNewValve(valve);
-        if (first != null) { tail().setNext(valve); }
+        if (first != null) {
+            tail().setNext(valve);
+        }
         basic = valve;
     }
 
@@ -83,7 +113,9 @@ public final class StandardPipeline implements Pipeline {
      */
     private Valve tail() {
         Valve current = first;
-        while (current.getNext() != basic) { current = current.getNext(); }
+        while (current.getNext() != basic) {
+            current = current.getNext();
+        }
         return current;
     }
 
@@ -100,7 +132,9 @@ public final class StandardPipeline implements Pipeline {
             throw new IllegalArgumentException("Valve is already linked");
         }
         for (Valve current = getFirst(); current != null; current = current.getNext()) {
-            if (current == valve) { throw new IllegalArgumentException("Valve is already registered"); }
+            if (current == valve) {
+                throw new IllegalArgumentException("Valve is already registered");
+            }
         }
     }
 }

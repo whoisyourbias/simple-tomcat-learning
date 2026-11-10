@@ -1,0 +1,7 @@
+GET /hello -> 200, body bytes=26
+GET /hello -> 200, body bytes=26
+Two GET requests: init/service/destroy=1/2/0
+GET /fail -> 500, body bytes=26
+HEAD /hello -> 200, body bytes=0
+GET /hello -> 200, body bytes=26
+PASS: error recovery, HEAD, lifecycle=1/4/1, repeated unload, port rebind
