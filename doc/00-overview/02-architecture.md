@@ -2,7 +2,7 @@
 
 기준은 Apache Tomcat 10.1.34다. 아래는 학습할 목표 흐름이다.
 
-2026-11-10 현재 0~4단계를 구현했다. 아래 전체 목표 중 Wrapper Pipeline까지 연결되며 WrapperValve가 Servlet을 직접 호출한다. FilterChain은 5단계, 전체 Lifecycle·Server/Service/Connector 조립은 6단계 예정이다. 실제 결과는 [4단계 기록](../04-container/01-mapping-and-pipeline.md)을 따른다.
+2026-11-10 현재 0~5단계를 구현했다. WrapperValve가 요청별 ApplicationFilterChain으로 Context 필터와 Servlet을 호출한다. 전체 Lifecycle·Server/Service/Connector 조립은 6단계 예정이다. 실제 결과는 [5단계 기록](../05-filter/01-filter-chain.md)을 따른다.
 
 [인터랙티브 구조도](tomcat-architecture.html)를 브라우저로 열면 일반 요청과 JSP 요청의 호출·응답 복귀, Mapper 조회와 Pipeline 실행의 차이를 확인할 수 있다. JSP·Spring MVC 분기는 전체 구조를 설명하는 예시이며, 이 프로젝트의 필수 구현 범위는 사용자 디스패처를 실행하는 내장 컨테이너까지다.
 

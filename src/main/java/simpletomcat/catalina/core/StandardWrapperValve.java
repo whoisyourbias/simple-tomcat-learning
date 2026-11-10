@@ -6,7 +6,7 @@ import simpletomcat.catalina.*;
 import simpletomcat.catalina.valves.ValveBase;
 import simpletomcat.servlet.*;
 
-/** 요청별 서블릿 할당·호출·반환을 소유한다. 필터·HTTP 오류 변환은 후속 단계다. */
+/** 요청별 서블릿 대여·필터 체인 호출·반환을 소유한다. HTTP 오류 변환은 Processor 책임이다. */
 public final class StandardWrapperValve extends ValveBase {
     /**
      * 이 기본 Valve가 소속된 Wrapper 컨테이너.
@@ -31,10 +31,14 @@ public final class StandardWrapperValve extends ValveBase {
     @Override
     public void invoke(ContainerRequest request, ServletResponse response) throws IOException, ServletException {
         if (request.wrapper() != owner) { throw new IllegalArgumentException("Selected wrapper differs from owner"); }
+        if (request.context() != owner.getParent()) {
+            throw new IllegalArgumentException("Selected context differs from wrapper parent");
+        }
         Servlet servlet = owner.allocate();
         Throwable serviceFailure = null;
         try {
-            servlet.service(request.servletRequest(), response);
+            var filters = request.context() == null ? java.util.List.<Filter>of() : request.context().getFilters();
+            new ApplicationFilterChain(filters, servlet).doFilter(request.servletRequest(), response);
         } catch (IOException | ServletException | RuntimeException | Error failure) {
             serviceFailure = failure;
             throw failure;

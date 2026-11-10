@@ -1,5 +1,7 @@
 # Tomcat 10.1.34 공식 소스 지도
 
+2026-11-10 5단계 구현에서는 S8 외 ApplicationFilterFactory.createFilterChain, ApplicationFilterConfig의 생성자/getFilter/initFilter/release, StandardContext.filterStart/filterStop/startInternal/stopInternal을 고정 소스로 조사했다. 책임·상태·실패·종료와 원본 SHA-256은 [상세 계획](../plans/2026-11-10-next-implementation.md#3-tomcat-10134-고정-소스-조사), 실제 차이·검증은 [5단계 기록](../05-filter/01-filter-chain.md)을 따른다.
+
 릴리스 태그 `10.1.34`에 고정한다. 최신 배포 권장 버전을 뜻하지 않는다. 클래스명과 함께 메서드의 책임·호출 순서·상태·오류·자원 소유권을 읽는다.
 
 | ID | 단계 | 공식 소스·읽을 메서드 | 확인할 동작 |
