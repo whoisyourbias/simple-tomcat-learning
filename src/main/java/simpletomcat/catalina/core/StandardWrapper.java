@@ -1,8 +1,8 @@
 package simpletomcat.catalina.core;
 
 import simpletomcat.catalina.Wrapper;
-
-
+import simpletomcat.catalina.Container;
+import simpletomcat.catalina.Context;
 import simpletomcat.servlet.Servlet;
 import simpletomcat.servlet.ServletException;
 import java.util.Objects;
@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  * 상태 전이는 동기화하지만 service를 직렬화하지는 않는다. 대여 중 unload는 기다리지 않고 거부한다.
  * 같은 객체의 대여를 구별하는 토큰은 없으므로 호출자는 대여마다 정확히 한 번 반환해야 한다.
  */
-public final class StandardWrapper implements Wrapper {
+public final class StandardWrapper extends ContainerBase implements Wrapper {
     /**
      * 새 비초기화 서블릿을 제공하는 팩터리.
      */
@@ -43,10 +43,30 @@ public final class StandardWrapper implements Wrapper {
      * @throws NullPointerException 팩터리가 null인 경우
      */
     public StandardWrapper(Supplier<? extends Servlet> factory) {
-
+        super("");
         this.factory = Objects.requireNonNull(factory, "factory");
-
+        installPipeline(new StandardWrapperValve(this));
     }
+
+    /**
+     * 서블릿 정의는 계층의 말단이므로 모든 자식 등록을 거부한다.
+     *
+     * @param child 등록을 시도한 자식
+     * @throws IllegalStateException 항상 발생
+     */
+    @Override
+    public void addChild(Container child) {
+        throw new IllegalStateException("Wrapper has no children");
+    }
+
+    /**
+     * Context 부모 또는 미연결 상태만 허용한다.
+     *
+     * @param parent 부모 후보 또는 null
+     * @return Context이거나 null이면 true
+     */
+    @Override
+    protected boolean acceptsParent(Container parent) { return parent == null || parent instanceof Context; }
 
     /**
      * init 성공 이후에만 인스턴스를 공개한다. 실패하면 다음 할당에서 생성을 재시도한다.
@@ -126,4 +146,3 @@ public final class StandardWrapper implements Wrapper {
         }
     }
 }
-

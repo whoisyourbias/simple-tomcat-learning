@@ -4,7 +4,7 @@ import simpletomcat.servlet.Servlet;
 import simpletomcat.servlet.ServletException;
 
 /** 서블릿 한 정의의 인스턴스와 생명주기를 소유한다. service 호출은 호출자의 책임이다. */
-public interface Wrapper {
+public interface Wrapper extends Container {
     /**
      * 초기화된 인스턴스를 대여한다. 사용 후 반드시 finally에서 deallocate해야 한다.
      *
@@ -29,4 +29,3 @@ public interface Wrapper {
      */
     void unload() throws ServletException;
 }
-

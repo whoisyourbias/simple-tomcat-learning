@@ -8,6 +8,8 @@
 
 원본 폴더의 `doc/plans/2026-11-10-step-3-servlet-wrapper.md`, `2026-11-10-step-4-catalina-pipeline.md`와 servlet/catalina 코드·테스트를 확인했다. 그곳은 3단계가 소켓 없는 Wrapper, 4단계가 수동 선택 Pipeline이다. 이 저장소의 [3단계](2026-11-05-step-03-servlet.md)·[4단계](2026-11-05-step-04-container.md)는 HTTP 연결·Mapper까지 요구하므로 단계 번호만으로 전체 복사하지 않는다. 원본 폴더는 변경하지 않는다.
 
+이관 시 확인한 원본 HEAD는 `937bebd2f2e74179cdda61d28f69cb38ca28784c`, Wrapper 구현 커밋은 `d170166`, 계층·Pipeline 구현 커밋은 `937bebd`다.
+
 재사용: 최소 Servlet 계약, Wrapper 생성·초기화·대여·반환·해제, ContainerBase와 타입별 컨테이너, Pipeline·기본 Valve 및 관련 테스트. 보완: connector 요청·응답, CoyoteAdapter, 실제 HTTP 예제·검증, Mapper·MappingData·URI 입력 정책. 런타임 의존성 없이 Java 21·기존 Maven/JUnit을 유지한다.
 
 ## Tomcat 10.1.34 구현 근거
@@ -59,16 +61,26 @@
 
 ### Task 2: 4단계 계층·매핑·기본 Pipeline
 
-- [ ] 이관 계층/Pipeline/호출 테스트 + 신규 Mapper·HTTP 테스트를 먼저 추가하고 실패 확인.
-- [ ] Container·Engine·Host·Context·ContainerRequest·Pipeline·Valve·core·valves 이관, Wrapper를 Container로 확장.
-- [ ] `mapper/MappingData` 불변 record와 `Mapper(Engine, String defaultHost)` 추가. `StandardContext.addServletMapping(String, Wrapper)`와 `getServletMappings()`는 등록된 Wrapper만 수용하고 중복 거부. map은 호출하지 않고 선택만 수행.
-- [ ] `connector/Request`에 MappingData·경로 3필드 연결, `CoyoteAdapter(Engine, Mapper)`가 Engine Pipeline 진입. 고정 Wrapper 생성자 유지.
-- [ ] `examples/ContainerServer`에서 두 Host·두 앱·중첩 Context·충돌 패턴 시연. 프로토콜 serve가 반환된 후 등록 Wrapper들을 unload.
-- [ ] 관련 테스트, 전체 clean verify, JAR HTTP Host/Context/매핑/404/400/500/다음 정상 요청·종료 실험.
-- [ ] `doc/04-container/` 기록과 현재 상태·제약·README 갱신, 함께 커밋하고 `learn/step-04` 생성. 기존 태그는 이동하지 않는다.
+- [x] 이관 계층/Pipeline/호출 테스트 + 신규 Mapper·HTTP 테스트를 먼저 추가하고 실패 확인.
+- [x] Container·Engine·Host·Context·ContainerRequest·Pipeline·Valve·core·valves 이관, Wrapper를 Container로 확장.
+- [x] `mapper/MappingData` 불변 record와 `Mapper(Engine, String defaultHost)` 추가. `StandardContext.addServletMapping(String, Wrapper)`와 `getServletMappings()`는 등록된 Wrapper만 수용하고 중복 거부. map은 호출하지 않고 선택만 수행.
+- [x] `connector/Request`에 MappingData·경로 3필드 연결, `CoyoteAdapter(Engine, Mapper)`가 Engine Pipeline 진입. 고정 Wrapper 생성자 유지.
+- [x] `examples/ContainerServer`에서 두 Host·두 앱·중첩 Context·충돌 패턴 시연. 프로토콜 serve가 반환된 후 등록 Wrapper들을 unload.
+- [x] 관련 테스트, 전체 clean verify, JAR HTTP Host/Context/매핑/404/400/500/다음 정상 요청·종료 실험.
+- [x] `doc/04-container/` 기록과 현재 상태·제약·README 갱신, 함께 커밋하고 `learn/step-04` 생성. 기존 태그는 이동하지 않는다.
 
 검토 초점: 실패 init의 destroy 오기록, service 예외 후 대여 누수, Context·접두어 경계, query/Host port 혼입, 비정규 경로 우회. 테스트 주석은 한국어 입력·기대 결과를 첫 테스트 애너테이션 바로 위에 쓴다. TCP 테스트는 임의 포트·유한 대기·latch/Future·확실한 close를 사용한다.
 
 ## 실제 실행 기록
 
 계획 시점에는 3·4단계 신규 검증 미실행. 이후 각 단계 문서에 실제 명령·결과·실패 이력과 완료 태그를 기록한다. 원본 폴더의 92/123개 결과는 이 저장소 결과로 사용하지 않는다.
+
+### Task 1 결과
+
+3단계는 `fddcb7d`, `learn/step-03`으로 완료했다. Wrapper stub에서 16사례 실패7/오류9, HTTP stub에서 4사례 모두 실패한 뒤 구현했다. 관련20·전체73 통과, clean verify 종료0·JAR 생성, JAR 실제 HTTP 두 요청·500·HEAD·복구·반복 unload·포트 재사용 성공. 독립 리뷰에서 주요 결함 없음. [3단계 기록](../03-servlet/01-servlet-and-wrapper.md)에 당시 결과를 보존했다.
+
+### Task 2 결과
+
+계층 테스트를 먼저 이관해 타입 미구현 실패를 확인했고 구현 이관 후 47사례 통과했다. Mapper·HTTP 테스트는 타입 미구현 실패 후 stub에서 34사례 실패25/오류9를 확인했다. 완성 후 관련85·전체138 통과, clean verify 종료0·JAR 생성, 최종 JAR ServletHttpExperiment와 ContainerHttpExperiment 실제 curl16·오류 복구·반복 해제·포트 재사용 성공. README·진행 상황·구조도·현재 제약·과거 계획에 실제 결과를 연결했다. 완료 경계는 `learn/step-04`다.
+
+독립 리뷰에서 P1/P2 수정 필수 결함 없음. 판단·제약: Valve는 한 Pipeline에만 사용한다는 기존 계약 유지, 예제 해제는 일반 예외를 모으지만 Error는 즉시 전파(주석도 이 범위로 수정), 테스트 도구 생성 중 인터럽트 정리는 후속 보완. URI 정책 검증은 `MappingPath`로 분리해 등록·Mapper가 공유했다. 전체 종료·무한 콜백·5초 hook 대기 한계는 6단계로 남긴다. [4단계 기록](../04-container/01-mapping-and-pipeline.md)에 명령·실제 결과·차이·검증 범위를 기록했다.

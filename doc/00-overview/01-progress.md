@@ -71,3 +71,19 @@
 | 4~7단계 | 예정. 전체 Lifecycle·동시 처리·Filter·내장 API 없음 |
 
 실제 실패·성공·검증 범위와 재현 방법은 [3단계 기록](../03-servlet/01-servlet-and-wrapper.md)에 남겼다.
+
+## 2026-11-10 — 4단계 컨테이너·Mapper·기본 Pipeline
+
+위 표들은 단계별 당시 상태다. 아래가 최신 구현 상태다.
+
+| 항목 | 최신 상태 |
+|---|---|
+| 0~4단계 | 구현·검증 완료 |
+| 계층·호출 | Engine→Host→Context→Wrapper Pipeline, WrapperValve가 대여·반환 |
+| 매핑 | 다중 Host·명시 기본 Host·최장 Context·정확→최장 접두어→확장자→기본 |
+| 요청 데이터·입력 | MappingData와 경로 3필드, query 원문, 비정규 경로 400·보호 경로 404 |
+| 검증 | 전체 138개 통과·clean verify·JAR 생성, curl 16사례·오류 뒤 정상 요청·포트 재사용 |
+| 완료 경계 | learn/step-03 = fddcb7d, learn/step-04는 코드·테스트·이번 학습 문서를 포함 |
+| 5~7단계 | 예정. Filter·전체 Lifecycle·동시성·내장 API 미구현 |
+
+참고 폴더 기준 `937bebd`의 동일 기능을 재사용했으며 그곳에서 빠진 HTTP·Mapper 범위를 보완했다. [4단계 기록](../04-container/01-mapping-and-pipeline.md)에 실제 이관 범위·실험·제약을 남겼다.

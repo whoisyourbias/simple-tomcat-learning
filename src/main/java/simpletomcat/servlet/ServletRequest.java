@@ -23,4 +23,11 @@ public interface ServletRequest {
      * @return 첫 번째 헤더 값, 해당 헤더가 없으면 null
      */
     String getHeader(String name);
+
+    /** 선택된 앱 경로. root 앱과 고정 Wrapper 요청은 빈 문자열이다. */
+    default String getContextPath() { return ""; }
+    /** 정확·확장자·기본 매핑은 앱 내부 전체 경로, 접두어 매핑은 접두어다. */
+    default String getServletPath() { return getRequestURI(); }
+    /** 접두어 뒤 남은 경로. 없으면 null이다. */
+    default String getPathInfo() { return null; }
 }

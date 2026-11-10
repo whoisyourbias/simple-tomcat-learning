@@ -28,11 +28,14 @@ public final class HttpTestServer implements AutoCloseable {
     public String get(String path) throws IOException { return request("GET", path, "localhost"); }
 
     public String request(String method, String path, String host) throws IOException {
+        return wire(method + " " + path + " HTTP/1.1\r\nHost: " + host + "\r\nX-Test: value\r\n\r\n");
+    }
+
+    public String wire(String request) throws IOException {
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress("127.0.0.1", port()), 3000);
             socket.setSoTimeout(3000);
-            socket.getOutputStream().write((method + " " + path + " HTTP/1.1\r\nHost: " + host
-                    + "\r\nX-Test: value\r\n\r\n").getBytes(StandardCharsets.US_ASCII));
+            socket.getOutputStream().write(request.getBytes(StandardCharsets.US_ASCII));
             socket.getOutputStream().flush();
             return new String(socket.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         }
